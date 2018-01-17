@@ -40,7 +40,7 @@ function setup() {
 	
 	ctx.font = "12px Comic Sans MS";
 	
-	for(let i = 0; i<1; i++) {
+	for(let i = 0; i<6; i++) {
 		serpentelli.push(new Serpentello(getRandomInt(0,canvas.width), getRandomInt(0,canvas.height), 0.5+Math.random()*6, Math.random()*Math.PI*2, getRandomInt(5, maxRad)));
 	}
 
