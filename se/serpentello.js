@@ -28,16 +28,13 @@ class Serpentello {
 			this.drawBodySegment(0,this.tail.length,this.tail.length);
 		} else {
 			this.drawBodySegment(0,this.tail.length-this.passIndexes[0]-1,this.tail.length);
-			console.log("A");
 			for (let i=0; i<this.passIndexes.length-1; i++) {
 				if (this.passIndexes[i] > 0) {
 					this.drawBodySegment(this.tail.length-this.passIndexes[i],this.tail.length-this.passIndexes[i+1],this.tail.length);
-					console.log("B");
 				}
 			}
 			if (this.passIndexes[this.passIndexes.length-1] > 0) {
 				this.drawBodySegment(this.tail.length-this.passIndexes[this.passIndexes.length-1],this.tail.length,this.tail.length);
-				console.log("C");
 			}
 		}
     
