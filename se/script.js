@@ -63,85 +63,82 @@ function loop() {
 		
 	}
 	if (pause == 0) {
-  	// clear screen
-  	ctx.fillStyle="black";
-  	ctx.fillRect(0,0,canvas.width,canvas.height);
-  	
-  	for (let s of serpentelli) {
-  		
-  		// follow
-  		s.follow(mousePos);
-  		
-  		// increment position
-  		s.move();
-  		
-  		// interact with borders
-  		s.borderInteraction();
+		// clear screen
+		ctx.fillStyle="black";
+		ctx.fillRect(0,0,canvas.width,canvas.height);
+		
+		for (let s of serpentelli) {	
+			// follow
+			s.follow(mousePos);
+			
+			// increment position
+			s.move();
+			
+			// interact with borders
+			s.borderInteraction();
   
-  		// draw coso
-  		s.draw();
-  	}
+			// draw coso
+			s.draw();
+		}
   	
-  	for (let o of obstacles) {
-  		ctx.beginPath();
-  		ctx.arc(o.x, o.y, 10, 0, Math.PI*2);
-  		ctx.fillStyle = 'rgba(255, 0, 0, 1)';
-  		ctx.fill();
-  		ctx.closePath()
-  	}
-  	
-  	if (mousePressed) {
-  		ctx.beginPath();
-  		rad = Math.sqrt((mousePosStart.x - mousePosEnd.x)*(mousePosStart.x - mousePosEnd.x) + (mousePosStart.y - mousePosEnd.y)*(mousePosStart.y - mousePosEnd.y));
-  		if (rad > maxRad) rad = maxRad;
-  		ctx.arc(mousePosStart.x, mousePosStart.y, rad, 0, Math.PI*2);
-  		ctx.fillStyle = 'rgba(255, 0, 0, 0.4)';
-  		ctx.fill();
-  		ctx.closePath()
-  	}
-  	
-  	ctx.fillStyle = "grey";
-  	
-  	ctx.fillText("Noise = " + noise.toFixed(2), 10, 20);
-  	ctx.fillText("Distance = " + serpentelli[0].idealDist, 10, 40);
-  	if(bounce == 1) ctx.fillText("Bounce", 10, 60);
-  	if(follow == 1) ctx.fillText("Follow", 10, 80);
-  	if(aligning == 1) ctx.fillText("Aligning", 10, 100);
-  	if(grouping == 1) ctx.fillText("Grouping", 10, 120);
+		for (let o of obstacles) {
+			ctx.beginPath();
+			ctx.arc(o.x, o.y, 10, 0, Math.PI*2);
+			ctx.fillStyle = 'rgba(255, 0, 0, 1)';
+			ctx.fill();
+			ctx.closePath()
+		}
+		
+		if (mousePressed) {
+			ctx.beginPath();
+			rad = Math.sqrt((mousePosStart.x - mousePosEnd.x)*(mousePosStart.x - mousePosEnd.x) + (mousePosStart.y - mousePosEnd.y)*(mousePosStart.y - mousePosEnd.y));
+			if (rad > maxRad) rad = maxRad;
+			ctx.arc(mousePosStart.x, mousePosStart.y, rad, 0, Math.PI*2);
+			ctx.fillStyle = 'rgba(255, 0, 0, 0.4)';
+			ctx.fill();
+			ctx.closePath()
+		}
+		
+		ctx.fillStyle = "grey";
+		
+		ctx.fillText("Noise = " + noise.toFixed(2), 10, 20);
+		ctx.fillText("Distance = " + serpentelli[0].idealDist, 10, 40);
+		if(bounce == 1) ctx.fillText("Bounce", 10, 60);
+		if(follow == 1) ctx.fillText("Follow", 10, 80);
+		if(aligning == 1) ctx.fillText("Aligning", 10, 100);
+		if(grouping == 1) ctx.fillText("Grouping", 10, 120);
 	}
-
-	
 }
 
 function keyDownHandler(evt) {
 	if(evt.keyCode == 39) { // right
-        rightPressed = true;
-    } else if(evt.keyCode == 37) { // left
-        leftPressed = true;
-    } else if(evt.keyCode == 38) { // up
+		rightPressed = true;
+	} else if(evt.keyCode == 37) { // left
+		leftPressed = true;
+	} else if(evt.keyCode == 38) { // up
 		upPressed = true;
-    } else if(evt.keyCode == 40) { // down
+	} else if(evt.keyCode == 40) { // down
 		downPressed = true;
-    }
+	}
 }
 
 function keyUpHandler(evt) {
 	if(evt.keyCode == 39) { // right
-        rightPressed = false;
-    } else if(evt.keyCode == 37) { // left
-        leftPressed = false;
-    } else if(evt.keyCode == 38) { // up
+		rightPressed = false;
+	} else if(evt.keyCode == 37) { // left
+		leftPressed = false;
+	} else if(evt.keyCode == 38) { // up
 		upPressed = false;
-    } else if(evt.keyCode == 40) { // down
+	} else if(evt.keyCode == 40) { // down
 		downPressed = false;
-    }  else if(evt.keyCode == 65) { // A
+	}  else if(evt.keyCode == 65) { // A
 		// Toggle aligning
 		if(aligning == 0) {
 			aligning = 1;
 		} else {
 			aligning = 0;
 		}
-    } else if(evt.keyCode == 66) { // B
+	} else if(evt.keyCode == 66) { // B
 		// Toggle bouncing on walls
 		if(bounce == 0) {
 			bounce = 1;
