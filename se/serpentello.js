@@ -1,7 +1,7 @@
 class Serpentello {
 	
-    constructor (startX, startY, startVel, startAngle, startSize) {
-        this.x = startX;
+  constructor (startX, startY, startVel, startAngle, startSize) {
+    this.x = startX;
 		this.y = startY;
 		this.vel = startVel;
 		this.velVect = new Vector(Math.cos(startAngle),Math.sin(startAngle));
@@ -17,20 +17,63 @@ class Serpentello {
 		this.idealDist = 50;
 		let intensity = 0.15;
 		this.calcParams(intensity);
+    this.passIndexes = [];
     }
 	
-    draw () {
+  draw () {
 		let angle = this.velVect.getAngle();
-		var siz = 0;
-		// tail
-		for (let i=0; i<this.tail.length; i++) {
-			ctx.beginPath();
-			ctx.arc(this.tail[i].x, this.tail[i].y, siz, 0, Math.PI*2);
-			ctx.fillStyle = this.color;
-			ctx.fill();
-			ctx.closePath();
-			siz+= this.size/this.tail.length;
-		}
+    
+    if (this.passIndexes.length<=0) {
+      this.drawBodySegment(0,this.tail.length,this.tail.length);
+    } else {
+      this.drawBodySegment(0,this.tail.length-this.passIndexes[0]-1,this.tail.length);
+      console.log("A");
+      for (let i=0; i<this.passIndexes.length-1; i++) {
+        if (this.passIndexes[i] > 0) {
+          this.drawBodySegment(this.tail.length-this.passIndexes[i],this.tail.length-this.passIndexes[i+1],this.tail.length);
+          console.log("B");
+        }
+      }
+      if (this.passIndexes[this.passIndexes.length-1] > 0) {
+        this.drawBodySegment(this.tail.length-this.passIndexes[this.passIndexes.length-1],this.tail.length,this.tail.length);
+        console.log("C");
+      }      
+    }
+    //body
+    
+    /*    
+    if (this.tail.length<30) {
+      this.drawBodySegment(0,this.tail.length,this.tail.length);
+    } else {
+      this.drawBodySegment(0,20,this.tail.length);
+    }
+    
+    let v1;
+    for (let i=0; i<this.tail.length-1; i++) {
+      v1 = new Vector ((this.tail[i+1].x-this.tail[i].x), (this.tail[i+1].y-this.tail[i].y));
+      v1.normalize();
+      v1.multiply(Vr);
+      v1.multiplyScalar(siz);
+      ctx.lineTo(this.tail[i+1].x+v1.x, this.tail[i+1].y+v1.y);
+      siz += this.size/this.tail.length;  
+    }
+    for (let i=1; i<this.tail.length-1; i++) {
+      v1 = new Vector ((this.tail[this.tail.length-i-1].x-this.tail[this.tail.length-i].x), (this.tail[this.tail.length-i-1].y-this.tail[this.tail.length-i].y));
+      v1.normalize();
+      v1.multiply(Vr);
+      v1.multiplyScalar(siz);
+      ctx.lineTo(this.tail[this.tail.length-i].x+v1.x, this.tail[this.tail.length-i].y+v1.y);
+      siz -= this.size/this.tail.length;   
+    }
+    ctx.fill();
+    */
+    
+    //head
+    ctx.beginPath();
+		ctx.arc(this.tail[this.tail.length-1].x, this.tail[this.tail.length-1].y, this.size, 0, Math.PI*2);
+		ctx.fillStyle = this.color;
+		ctx.fill();
+		ctx.closePath();
 		
 		//new eyes
 		let tempV = new Vector(this.eye1.x, this.eye1.y);
@@ -49,7 +92,59 @@ class Serpentello {
 		ctx.fill();
 		ctx.closePath();
 		
+  }
+  
+  drawBodySegment(startIndex, endIndex, totalLength) {
+    let v1;
+    let siz = this.size*startIndex/totalLength;
+    let Vr = new Vector(0,-1);
+    ctx.beginPath();
+		ctx.fillStyle = this.color;
+    ctx.moveTo(this.tail[startIndex].x,this.tail[startIndex].y);
+    for (let i=0; i<(endIndex-startIndex)-1; i++) {
+      v1 = new Vector ((this.tail[startIndex+i+1].x-this.tail[startIndex+i].x), (this.tail[startIndex+i+1].y-this.tail[startIndex+i].y));
+      v1.normalize();
+      v1.multiply(Vr);
+      v1.multiplyScalar(siz);
+      ctx.lineTo(this.tail[startIndex+i+1].x+v1.x, this.tail[startIndex+i+1].y+v1.y);
+      siz += this.size/totalLength;  
     }
+    for (let i=1; i<(endIndex-startIndex); i++) {
+      v1 = new Vector ((this.tail[endIndex-i-1].x-this.tail[endIndex-i].x), (this.tail[endIndex-i-1].y-this.tail[endIndex-i].y));
+      v1.normalize();
+      v1.multiply(Vr);
+      v1.multiplyScalar(siz);
+      ctx.lineTo(this.tail[endIndex-i].x+v1.x, this.tail[endIndex-i].y+v1.y);
+      siz -= this.size/totalLength;   
+    }
+    ctx.fill();
+    
+    /*
+    let v1;
+    let siz = 0;
+    let Vr = new Vector(0,-1);
+    ctx.beginPath();
+		ctx.fillStyle = this.color;
+    ctx.moveTo(this.tail[0].x,this.tail[0].y);
+    for (let i=0; i<this.tail.length-1; i++) {
+      v1 = new Vector ((this.tail[i+1].x-this.tail[i].x), (this.tail[i+1].y-this.tail[i].y));
+      v1.normalize();
+      v1.multiply(Vr);
+      v1.multiplyScalar(siz);
+      ctx.lineTo(this.tail[i+1].x+v1.x, this.tail[i+1].y+v1.y);
+      siz += this.size/totalLength;  
+    }
+    for (let i=1; i<this.tail.length-1; i++) {
+      v1 = new Vector ((this.tail[this.tail.length-i-1].x-this.tail[this.tail.length-i].x), (this.tail[this.tail.length-i-1].y-this.tail[this.tail.length-i].y));
+      v1.normalize();
+      v1.multiply(Vr);
+      v1.multiplyScalar(siz);
+      ctx.lineTo(this.tail[this.tail.length-i].x+v1.x, this.tail[this.tail.length-i].y+v1.y);
+      siz -= this.size/totalLength;   
+    }
+    ctx.fill();
+    */
+  }
 	
 	follow(pos) {
 		
@@ -135,21 +230,32 @@ class Serpentello {
 		if(this.tail.length > this.tailLength) {
 			this.tail.shift();
 		}
+    for (let i=0; i<this.passIndexes.length; i++) {
+      this.passIndexes[i]++;
+      if (this.passIndexes[i] > this.tail.length) {
+        this.passIndexes.splice(i,1);
+      }
+      
+    }
 	}
 	
 	borderInteraction() {
 		if (bounce == 0) {
 			if (this.x > canvas.width+maxRad) {
 				this.x = -maxRad;
+        this.passIndexes.push(0);
 			}
 			if (this.x < -maxRad) {
 				this.x = canvas.width+maxRad;
+        this.passIndexes.push(0);
 			}
 			if (this.y > canvas.height+maxRad) {
 				this.y = -maxRad;
+        this.passIndexes.push(0);
 			}
 			if (this.y < -maxRad) {
 				this.y = canvas.height+maxRad;
+        this.passIndexes.push(0);
 			}
 		} else {
 			if (this.x > canvas.width-this.size) {
