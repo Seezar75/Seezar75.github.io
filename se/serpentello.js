@@ -27,7 +27,7 @@ class Serpentello {
 		if (this.passIndexes.length<=0) {
 			this.drawBodySegment(0,this.tail.length,this.tail.length);
 		} else {
-			this.drawBodySegment(0,this.tail.length-this.passIndexes[0]-1,this.tail.length);
+			this.drawBodySegment(0,this.tail.length-this.passIndexes[0],this.tail.length);
 			for (let i=0; i<this.passIndexes.length-1; i++) {
 				if (this.passIndexes[i] > 0) {
 					this.drawBodySegment(this.tail.length-this.passIndexes[i],this.tail.length-this.passIndexes[i+1],this.tail.length);
@@ -176,8 +176,11 @@ class Serpentello {
 		}
 		for (let i=0; i<this.passIndexes.length; i++) {
 			this.passIndexes[i]++;
+		}
+		for (let i=0; i<this.passIndexes.length; i++) {
 			if (this.passIndexes[i] > this.tail.length) {
 				this.passIndexes.splice(i,1);
+				break;
 			}
 		}
 	}
