@@ -20,7 +20,7 @@ let mousePosStart;
 let mousePosEnd;
 let maxRad = 30;
 
-let bounce = 1;
+let bounce = 0;
 let avoidObstacles = 1;
 let follow = 0;
 let aligning = 0;
@@ -40,7 +40,7 @@ function setup() {
 	
 	ctx.font = "12px Comic Sans MS";
 	
-	for(let i = 0; i<6; i++) {
+	for(let i = 0; i<10; i++) {
 		serpentelli.push(new Serpentello(getRandomInt(0,canvas.width), getRandomInt(0,canvas.height), 0.5+Math.random()*6, Math.random()*Math.PI*2, getRandomInt(5, maxRad)));
 	}
 
