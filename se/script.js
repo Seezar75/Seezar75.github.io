@@ -175,6 +175,7 @@ function keyUpHandler(evt) {
 			"G: toggle grouping\n" +
 			"N: change noise\n" +
 			"O: place an obstacle at mouse position\n" +
+			"P: pause animation\n" +
 			"Numpad +: increase distance\n" +
 			"Numpad -: decrease distance\n\n" +
 			"Click and drag to create another serpentello\n" +
