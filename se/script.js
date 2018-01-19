@@ -182,7 +182,7 @@ function keyUpHandler(evt) {
 			"Click on a serpentello's head to delete it";
 		alert(helpString);
 	} else if (evt.keyCode == 78) { // N
-		// Place obstacle
+		// Change noise level
 		noise += 0.05;
 		if (noise > 0.7) noise = 0;
 	} else if (evt.keyCode == 79) { // O
