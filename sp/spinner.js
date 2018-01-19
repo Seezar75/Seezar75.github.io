@@ -62,7 +62,7 @@ function calculate() {
 	d12 = r4+r3;
 	a1 = d2*Math.sin((0.5)*(Math.PI*2)/n) * r3 / d12;
 	b1 = (d2*Math.cos((Math.PI*2)/n*(0.5))-d1) * r3 / d12;
-	rBody = Math.sqrt(Math.pow(a1,2)+Math.pow((d1)+b1), 2);
+	rBody = Math.sqrt(Math.pow(a1,2)+Math.pow((d1)+b1,2));
 	alfa2 = Math.atan(d1*Math.sin(Math.PI/n)/(d1*Math.cos(Math.PI/n)-d2));
 	if (alfa2 < 0) {
 		alfa2 = alfa2 + Math.PI;
@@ -113,39 +113,39 @@ function exportSVG() {
   
   svg = svg + "\t\t<ellipse cx=\"0\" cy=\"0\" rx=\"" + r1 + "\" ry=\"" + r1 + "\"/>\n";
   
-  var flag = 0;
+  let flag = 0;
   if (b1<0) {
     flag = 1;
   }
   
-  var alfa3 = Math.atan(a1/(d1+b1));
+  let alfa3 = Math.atan(a1/(d1+b1));
   if (alfa3 < 0) {
     alfa3 = alfa3 + Math.PI;
   }
   
-  var flag2 = 0;
+  let flag2 = 0;
   if (alfa2*2<Math.PI) {
     flag2 = 1;
   }
 
    for (var i = 0; i < n; i++) {
-     var xc1 = d1*Math.cos(i*2*Math.PI/n);
-     var yc1 = d1*Math.sin(i*2*Math.PI/n);
+     let xc1 = d1*Math.cos(i*2*Math.PI/n);
+     let yc1 = d1*Math.sin(i*2*Math.PI/n);
      svg = svg + "\t\t<ellipse cx=\"" + xc1 + "\" cy=\"" + yc1 + "\" rx=\"" + r2 + "\" ry=\"" + r2 + "\"/>\n";
      drawCross(xc1, yc1);
    }
   
-  var x1 = rBody*Math.cos(-alfa3);
-  var y1 = rBody*Math.sin(-alfa3);
+  let x1 = rBody*Math.cos(-alfa3);
+  let y1 = rBody*Math.sin(-alfa3);
   
   svg = svg + "\t\t<path d=\"M" + x1 + "," + y1 + " ";
   
   for (var i = 0; i < n; i++) {
 
-    var x2 = rBody*Math.cos(alfa3+(i*2*Math.PI/n));
-    var y2 = rBody*Math.sin(alfa3+(i*2*Math.PI/n));
-    var x3 = rBody*Math.cos(-alfa3+((i+1)*2*Math.PI/n));
-    var y3 = rBody*Math.sin(-alfa3+((i+1)*2*Math.PI/n));
+    let x2 = rBody*Math.cos(alfa3+(i*2*Math.PI/n));
+    let y2 = rBody*Math.sin(alfa3+(i*2*Math.PI/n));
+    let x3 = rBody*Math.cos(-alfa3+((i+1)*2*Math.PI/n));
+    let y3 = rBody*Math.sin(-alfa3+((i+1)*2*Math.PI/n));
     
     svg = svg + "\n\t\t\tA " + r3 + " " + r3 + " 0 " + flag + " 1 " + x2 + " " + y2 + " ";
     svg = svg + "\n\t\t\tA " + r4 + " " + r4 + " 0 " + flag2 + " 0 " + x3 + " " + y3 + " ";
@@ -159,7 +159,7 @@ function exportSVG() {
   svg = svg + "\t</g>\n";
   svg = svg + "</svg>";
 
-  alert(svg);
+  console.log(svg);
   //svgArea.value(svg);
 }
 
