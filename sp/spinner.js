@@ -82,9 +82,9 @@ function drawSpinner() {
 		alfa = alfa + Math.PI;
 	}
 	
-	for (var i = 0; i < n; i++) {
-		var xc1 = d1*Math.cos(i*2*Math.PI/n);
-		var yc1 = d1*Math.sin(i*2*Math.PI/n);
+	for (let i = 0; i < n; i++) {
+		let xc1 = d1*Math.cos(i*2*Math.PI/n);
+		let yc1 = d1*Math.sin(i*2*Math.PI/n);
 		ctx.beginPath();
 		ctx.arc(xc1, yc1, r2, 0, 2*Math.PI);
 		ctx.stroke();
@@ -93,8 +93,8 @@ function drawSpinner() {
 		ctx.arc(xc1, yc1, r3, -alfa+(i*2*Math.PI/n), alfa+(i*2*Math.PI/n));
 		ctx.stroke();
     
-		var xc2 = d2*Math.cos((i+0.5)*2*Math.PI/n);
-		var yc2 = d2*Math.sin((i+0.5)*2*Math.PI/n);
+		let xc2 = d2*Math.cos((i+0.5)*2*Math.PI/n);
+		let yc2 = d2*Math.sin((i+0.5)*2*Math.PI/n);
 		
 		ctx.beginPath();
 		ctx.arc(xc2, yc2, r4, alfa2+((i+0.5)*2*Math.PI/n), -alfa2+((i+0.5)*2*Math.PI/n)+(2*Math.PI));
@@ -128,7 +128,7 @@ function exportSVG() {
     flag2 = 1;
   }
 
-   for (var i = 0; i < n; i++) {
+   for (let i = 0; i < n; i++) {
      let xc1 = d1*Math.cos(i*2*Math.PI/n);
      let yc1 = d1*Math.sin(i*2*Math.PI/n);
      svg = svg + "\t\t<ellipse cx=\"" + xc1 + "\" cy=\"" + yc1 + "\" rx=\"" + r2 + "\" ry=\"" + r2 + "\"/>\n";
@@ -140,7 +140,7 @@ function exportSVG() {
   
   svg = svg + "\t\t<path d=\"M" + x1 + "," + y1 + " ";
   
-  for (var i = 0; i < n; i++) {
+  for (let i = 0; i < n; i++) {
 
     let x2 = rBody*Math.cos(alfa3+(i*2*Math.PI/n));
     let y2 = rBody*Math.sin(alfa3+(i*2*Math.PI/n));
@@ -164,8 +164,8 @@ function exportSVG() {
 }
 
 function drawCross(x, y) {
-  svg = svg + "\t\t<line x1=\"" + (x-3) + "\" y1=\"" + y + "\" x2=\"" + (x+3) + "\" y2=\"" + y + "\" style=\"stroke:rgb(0,0,0);stroke-width:0.15\" />\n";
-  svg = svg + "\t\t<line x1=\"" + x + "\" y1=\"" + (y-3) + "\" x2=\"" + x + "\" y2=\"" + (y+3) + "\" style=\"stroke:rgb(0,0,0);stroke-width:0.15\" />\n";
+	svg = svg + "\t\t<line x1=\"" + (x-3) + "\" y1=\"" + y + "\" x2=\"" + (x+3) + "\" y2=\"" + y + "\" style=\"stroke:rgb(0,0,0);stroke-width:0.15\" />\n";
+	svg = svg + "\t\t<line x1=\"" + x + "\" y1=\"" + (y-3) + "\" x2=\"" + x + "\" y2=\"" + (y+3) + "\" style=\"stroke:rgb(0,0,0);stroke-width:0.15\" />\n";
 }
 
 function mouseDownHandler(evt) {
