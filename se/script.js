@@ -12,6 +12,10 @@ window.onload = function() {
 	canvas.addEventListener('mousemove', mouseMoveHandler, false);
 	canvas.addEventListener('mousedown', mouseDownHandler, false);
 	canvas.addEventListener('mouseup', mouseUpHandler, false);
+	canvas.addEventListener('touchmove', touchMoveHandler, false);
+	canvas.addEventListener('touchstart', touchStartHandler, false);
+	canvas.addEventListener('touchend', touchEndHandler, false);
+	canvas.addEventListener('touchcancel', touchCancelHandler, false);
 	setInterval(loop, 20);
 	setup();
 }
@@ -31,13 +35,16 @@ let grouping = 0;
 let noise = 0.1;
 let pause = 0;
 
+let touchStatus = 0;
+let lastTouch = new Date().getTime();
+
 rightPressed = leftPressed = upPressed = downPressed = false;
 
 let serpentelli = [];
 let obstacles = [];
 
 let v;
-let v2
+let v2;
 
 function setup() {
 
@@ -91,7 +98,7 @@ function loop() {
 		ctx.arc(o.x, o.y, 10, 0, Math.PI * 2);
 		ctx.fillStyle = 'rgba(255, 0, 0, 1)';
 		ctx.fill();
-		ctx.closePath()
+		ctx.closePath();
 	}
 
 	if (mousePressed) {
@@ -101,7 +108,7 @@ function loop() {
 		ctx.arc(mousePosStart.x, mousePosStart.y, rad, 0, Math.PI * 2);
 		ctx.fillStyle = 'rgba(255, 0, 0, 0.4)';
 		ctx.fill();
-		ctx.closePath()
+		ctx.closePath();
 	}
 
 	ctx.fillStyle = "grey";
@@ -112,6 +119,20 @@ function loop() {
 	if (follow == 1) ctx.fillText("Follow", 10, 80);
 	if (aligning == 1) ctx.fillText("Aligning", 10, 100);
 	if (grouping == 1) ctx.fillText("Grouping", 10, 120);
+
+	if (touchStatus == 1) {
+		ctx.beginPath();
+		ctx.arc(canvas.width - 30, 30, 10, 0, Math.PI * 2);
+		ctx.fillStyle = 'rgb(255, 0, 0)';
+		ctx.fill();
+		ctx.closePath();
+	} else if (touchStatus == 2) {
+		ctx.beginPath();
+		ctx.arc(canvas.width - 30, 30, 10, 0, Math.PI * 2);
+		ctx.fillStyle = 'rgb(0, 255, 255)';
+		ctx.fill();
+		ctx.closePath();
+	}
 }
 
 function keyDownHandler(evt) {
@@ -266,6 +287,71 @@ function getMousePos(canvas, evt) {
 		x: evt.clientX - rect.left,
 		y: evt.clientY - rect.top
 	};
+}
+
+function touchStartHandler(evt) {
+	mousePos.x = Math.floor(evt.targetTouches[0].clientX);
+	mousePos.y = Math.floor(evt.targetTouches[0].clientY);
+	let curTouch = new Date().getTime();
+	if (curTouch - lastTouch < 400) {
+		if (touchStatus == 1 && obstacles.length > 1) {
+			obstacles.pop();
+		}
+		touchStatus++;
+		if (touchStatus > 2) {
+			touchStatus = 0;
+		}
+	}
+	lastTouch = curTouch;
+	if (touchStatus == 0) {
+		follow = 1;
+	} else if (touchStatus == 1) {
+		obstacles.push({
+			x: mousePos.x,
+			y: mousePos.y
+		});
+	} else {
+		mousePressed = true;
+		mousePosStart = {
+			x: mousePos.x,
+			y: mousePos.y
+		};
+		mousePosEnd = {
+			x: mousePos.x,
+			y: mousePos.y
+		};
+	}
+
+	evt.preventDefault();
+}
+
+function touchMoveHandler(evt) {
+	mousePos.x = Math.floor(evt.targetTouches[0].clientX);
+	mousePos.y = Math.floor(evt.targetTouches[0].clientY);
+	if (touchStatus == 2) {
+		mousePosEnd = {
+			x: mousePosStart.x + ((mousePos.x - mousePosStart.x) / 6),
+			y: mousePosStart.y + ((mousePos.y - mousePosStart.y) / 6)
+		};
+	}
+}
+
+function touchEndHandler(evt) {
+	follow = 0;
+	if (mousePressed) {
+		rad = Math.sqrt((mousePosStart.x - mousePosEnd.x) * (mousePosStart.x - mousePosEnd.x) + (mousePosStart.y - mousePosEnd.y) * (mousePosStart.y - mousePosEnd.y));
+		if (rad > maxRad) rad = maxRad;
+		if (rad > 2) {
+			serpentelli.push(new Serpentello(mousePosStart.x, mousePosStart.y, 0.5 + Math.random() * 6, Math.random() * Math.PI * 2, rad));
+			serpentelli.sort((a, b) => b.size - a.size);
+		}
+	}
+	mousePressed = false;
+}
+
+function touchCancelHandler(evt) {
+	follow = 0;
+	mousePressed = false;
 }
 
 function getRandomColor() {
