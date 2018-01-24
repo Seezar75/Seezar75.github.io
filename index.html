@@ -1,10 +1,45 @@
 <html>
-  <title>Test</title>
-  <body>
-    <a href="./se/serpentelli.html">Serpentelli</a>
-    <br/>
-    <a href="./IK/IK.html">IK</a>
-    <br/>
-    <a href="./sp/spinner.html">Spinner</a>
-  </body>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Js experiments</title>
+
+<body>
+  <nav id="nav_1">
+    <ul>
+      <li><a href="./se/serpentelli.html">Serpentelli</a></li>
+      <li><a href="./IK/IK.html">IK</a></li>
+      <li><a href="./sp/spinner.html">Spinner</a></li>
+    </ul>
+  </nav>
+  <style>
+    #nav_1 ul {
+      list-style: none;
+      background: #1c1c1c;
+      padding: 5px 0;
+      max-width: 200px;
+    }
+
+    #nav_1 li a {
+      display: block;
+      padding: 0 20px;
+      color: #fff;
+      text-decoration: none;
+      font-family: Arial, Helvetica, sans-serif;
+      letter-spacing: 0.1em;
+      line-height: 2em;
+      height: 2em;
+      border-bottom: 2px solid #383838;
+    }
+
+    #nav_1 li:last-child a {
+      border-bottom: none;
+    }
+
+    #nav_1 li a:hover,
+    #nav_1 li a:focus {
+      color: #1c1c1c;
+      background: #ccc;
+    }
+  </style>
+</body>
+
 </html>
