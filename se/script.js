@@ -80,14 +80,12 @@ function loop() {
 	for (let s of serpentelli) {
 
 		if (pause == 0) {
-			// follow
-			s.follow(mousePos);
+			// update direction and speed
+			s.update(mousePos);
 
 			// increment position
 			s.move();
 
-			// interact with borders
-			s.borderInteraction();
 		}
 		// draw coso
 		s.draw();
@@ -222,7 +220,7 @@ function keyUpHandler(evt) {
 		for (let s of serpentelli) {
 			s.detectionDist += 10;
 			s.idealDist = s.detectionDist / 2;
-			s.calcParams(0.15);
+			s.calcParams(s.intensity);
 		}
 	} else if (evt.keyCode == 109) { // NumPad -
 		// Decrease distance
@@ -230,7 +228,7 @@ function keyUpHandler(evt) {
 			s.detectionDist -= 10;
 			if (s.detectionDist < 20) s.detectionDist = 20;
 			s.idealDist = s.detectionDist / 2;
-			s.calcParams(0.15);
+			s.calcParams(s.intensity);
 		}
 	}
 }
