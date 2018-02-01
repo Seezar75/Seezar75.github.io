@@ -16,10 +16,10 @@ class Serpentello {
 		this.followRate = getRandomInt(4, 20);
 		this.eye1 = new Vector(0.4, 0.4);
 		this.eye2 = new Vector(0.4, -0.4);
-		this.detectionDist = 100;
-		this.idealDist = 50;
-		let intensity = 0.15;
-		this.calcParams(intensity);
+		this.detectionDist = 140;
+		this.idealDist = 70;
+		this.intensity = 0.05;
+		this.calcParams(this.intensity);
 		this.passIndexes = [];
 	}
 
@@ -93,7 +93,7 @@ class Serpentello {
 		ctx.fill();
 	}
 
-	follow(pos) {
+	update(pos) {
 
 		// Follow mouse
 		if (follow == 1) {
@@ -132,8 +132,8 @@ class Serpentello {
 					let otherVelVect = new Vector(s.velVect.x, s.velVect.y);
 					let dist = this.getDist(s.x, s.y);
 					if (dist < this.detectionDist) {
-						otherVelVect.multiplyScalar(1 / dist);
-						otherVel += (s.vel - this.vel) / dist;
+						otherVelVect.multiplyScalar(0.5 / dist);
+						otherVel += (s.vel - this.vel) / (dist * 2);
 						alignVect.add(otherVelVect);
 					}
 				} else {
@@ -144,54 +144,32 @@ class Serpentello {
 			this.vel += otherVel / 3;
 		}
 
+		// Grouping
 		if (grouping == 1) {
+			let count = 1;
 			let ootherDistVect = new Vector(0, 0);
 			for (let s of serpentelli) {
 				if (this != s) {
 					let relative = new Vector(s.x - this.x, s.y - this.y);
-					let dist = relative.getModule();
+					let dist = relative.getModule() - (this.size / 2);
 					relative.normalize();
 					if (dist > this.detectionDist) {
 						relative.multiplyScalar(0);
 					} else {
 						relative.multiplyScalar(this.A * dist * dist + this.B * dist + this.C);
+						if (dist < this.detectionDist) relative.multiplyScalar(2);
+						count++;
 					}
-					//relative.multiplyScalar(3500/(dist*dist));
 					ootherDistVect.add(relative);
 				} else {
 					// It's me
 				}
 			}
+			ootherDistVect.multiplyScalar(1 / count);
 			this.velVect.add(ootherDistVect);
 		}
 
-		// Grouping
-
-		this.velVect.normalize();
-	}
-
-	move() {
-		this.x += this.vel * this.velVect.x;
-		this.y += this.vel * this.velVect.y;
-		this.tail.push({
-			x: this.x,
-			y: this.y
-		});
-		if (this.tail.length > this.tailLength) {
-			this.tail.shift();
-		}
-		for (let i = 0; i < this.passIndexes.length; i++) {
-			this.passIndexes[i]++;
-		}
-		for (let i = 0; i < this.passIndexes.length; i++) {
-			if (this.passIndexes[i] > this.tail.length) {
-				this.passIndexes.splice(i, 1);
-				break;
-			}
-		}
-	}
-
-	borderInteraction() {
+		//border bouncing or crossing
 		if (bounce == 0) {
 			if (this.x > canvas.width + maxRad) {
 				this.x = -maxRad;
@@ -225,6 +203,30 @@ class Serpentello {
 			if (this.y < this.size) {
 				this.velVect.y = -this.velVect.y;
 				this.y = this.size;
+			}
+		}
+
+		this.velVect.normalize();
+
+	}
+
+	move() {
+		this.x += this.vel * this.velVect.x;
+		this.y += this.vel * this.velVect.y;
+		this.tail.push({
+			x: this.x,
+			y: this.y
+		});
+		if (this.tail.length > this.tailLength) {
+			this.tail.shift();
+		}
+		for (let i = 0; i < this.passIndexes.length; i++) {
+			this.passIndexes[i]++;
+		}
+		for (let i = 0; i < this.passIndexes.length; i++) {
+			if (this.passIndexes[i] > this.tail.length) {
+				this.passIndexes.splice(i, 1);
+				break;
 			}
 		}
 	}
