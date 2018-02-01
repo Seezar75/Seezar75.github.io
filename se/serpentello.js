@@ -133,7 +133,7 @@ class Serpentello {
 					let dist = this.getDist(s.x, s.y);
 					if (dist < this.detectionDist) {
 						otherVelVect.multiplyScalar(0.5 / dist);
-						otherVel += (s.vel - this.vel) / (dist*2);
+						otherVel += (s.vel - this.vel) / (dist * 2);
 						alignVect.add(otherVelVect);
 					}
 				} else {
@@ -151,12 +151,13 @@ class Serpentello {
 			for (let s of serpentelli) {
 				if (this != s) {
 					let relative = new Vector(s.x - this.x, s.y - this.y);
-					let dist = relative.getModule()-(this.size/2);
+					let dist = relative.getModule() - (this.size / 2);
 					relative.normalize();
 					if (dist > this.detectionDist) {
 						relative.multiplyScalar(0);
 					} else {
 						relative.multiplyScalar(this.A * dist * dist + this.B * dist + this.C);
+						if (dist < this.detectionDist) relative.multiplyScalar(2);
 						count++;
 					}
 					ootherDistVect.add(relative);
@@ -164,7 +165,7 @@ class Serpentello {
 					// It's me
 				}
 			}
-			ootherDistVect.multiplyScalar(1/count);
+			ootherDistVect.multiplyScalar(1 / count);
 			this.velVect.add(ootherDistVect);
 		}
 
