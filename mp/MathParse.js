@@ -11,7 +11,7 @@ function parseText() {
 function plot() {
 	console.time("Plot time");
 	let steps = 100;
-	let scaleX = canvas.width/steps;
+	let scaleX = canvas.width / steps;
 	let scaleY = scaleX;
 	let out = 0;
 	ctx.fillStyle = "white";
@@ -20,9 +20,9 @@ function plot() {
 	ctx.strokeRect(0, 0, canvas.width, canvas.height);
 	ctx.beginPath();
 	ctx.strokeStyle = "red";
-	for(let i = 0; i <= steps; i++) {
+	for (let i = 0; i <= steps; i++) {
 		out = MathParse.parse(document.getElementById('expr').value.toLowerCase(), i);
-		ctx.lineTo(i*scaleX, canvas.height-(out*scaleY));
+		ctx.lineTo(i * scaleX, canvas.height - (out * scaleY));
 	}
 	ctx.stroke();
 	console.timeEnd("Plot time");
@@ -34,6 +34,11 @@ class MathParse {
 		let currIndex = 0;
 		let result = 0;
 		let depth = 0;
+		// Handle double negatives
+		while (block.indexOf('--') != -1 || block.indexOf('-+') != -1) {
+			block = block.replace("--", "+");
+			block = block.replace("-+", "-");
+		}
 		// Check for simple number
 		if (block.indexOf('+') == -1 &&
 			block.indexOf('-') == -1 &&
@@ -53,7 +58,7 @@ class MathParse {
 		}
 		// Serching + or - operator outside brackets
 		depth = 0;
-		currIndex = block.length-1;
+		currIndex = block.length - 1;
 		while (currIndex >= 0) {
 			if (block.charAt(currIndex) == '(') {
 				depth++;
@@ -68,7 +73,7 @@ class MathParse {
 		}
 		// Serching * or / operator outside brackets
 		depth = 0;
-		currIndex = block.length-1;
+		currIndex = block.length - 1;
 		while (currIndex >= 0) {
 			if (block.charAt(currIndex) == '(') {
 				depth++;
@@ -108,20 +113,36 @@ class MathParse {
 			let oper = block.substring(0, block.indexOf('('));
 			if ("sin" === oper) {
 				return Math.sin(MathParse.parse(block.substring(block.indexOf('(') + 1, block.length - 1), xVal));
+			} else if ("sinh" === oper) {
+				return Math.sinh(MathParse.parse(block.substring(block.indexOf('(') + 1, block.length - 1), xVal));
 			} else if ("cos" === oper) {
 				return Math.cos(MathParse.parse(block.substring(block.indexOf('(') + 1, block.length - 1), xVal));
+			} else if ("cosh" === oper) {
+				return Math.cosh(MathParse.parse(block.substring(block.indexOf('(') + 1, block.length - 1), xVal));
 			} else if ("asin" === oper) {
 				return Math.asin(MathParse.parse(block.substring(block.indexOf('(') + 1, block.length - 1), xVal));
+			} else if ("asinh" === oper) {
+				return Math.asinh(MathParse.parse(block.substring(block.indexOf('(') + 1, block.length - 1), xVal));
 			} else if ("acos" === oper) {
 				return Math.acos(MathParse.parse(block.substring(block.indexOf('(') + 1, block.length - 1), xVal));
+			} else if ("acosh" === oper) {
+				return Math.acosh(MathParse.parse(block.substring(block.indexOf('(') + 1, block.length - 1), xVal));
 			} else if ("tan" === oper) {
 				return Math.tan(MathParse.parse(block.substring(block.indexOf('(') + 1, block.length - 1), xVal));
+			} else if ("tanh" === oper) {
+				return Math.tanh(MathParse.parse(block.substring(block.indexOf('(') + 1, block.length - 1), xVal));
 			} else if ("atan" === oper) {
 				return Math.atan(MathParse.parse(block.substring(block.indexOf('(') + 1, block.length - 1), xVal));
+			} else if ("atanh" === oper) {
+				return Math.atanh(MathParse.parse(block.substring(block.indexOf('(') + 1, block.length - 1), xVal));
 			} else if ("sqrt" === oper) {
 				return Math.sqrt(MathParse.parse(block.substring(block.indexOf('(') + 1, block.length - 1), xVal));
 			} else if ("log" === oper) {
 				return Math.log(MathParse.parse(block.substring(block.indexOf('(') + 1, block.length - 1), xVal));
+			} else if ("log10" === oper) {
+				return Math.log10(MathParse.parse(block.substring(block.indexOf('(') + 1, block.length - 1), xVal));
+			} else if ("log2" === oper) {
+				return Math.log2(MathParse.parse(block.substring(block.indexOf('(') + 1, block.length - 1), xVal));
 			} else if ("exp" === oper) {
 				return Math.exp(MathParse.parse(block.substring(block.indexOf('(') + 1, block.length - 1), xVal));
 			} else {
