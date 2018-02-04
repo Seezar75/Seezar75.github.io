@@ -53,8 +53,8 @@ class MathParse {
 		}
 		// Serching + or - operator outside brackets
 		depth = 0;
-		currIndex = 0;
-		while (currIndex < block.length) {
+		currIndex = block.length-1;
+		while (currIndex >= 0) {
 			if (block.charAt(currIndex) == '(') {
 				depth++;
 			} else if (block.charAt(currIndex) == ')') {
@@ -64,12 +64,12 @@ class MathParse {
 			} else if ((block.charAt(currIndex) == '-') && (depth == 0)) {
 				return MathParse.parse(block.substring(0, currIndex), xVal) - MathParse.parse(block.substring(currIndex + 1, block.length), xVal);
 			}
-			currIndex++;
+			currIndex--;
 		}
 		// Serching * or / operator outside brackets
 		depth = 0;
-		currIndex = 0;
-		while (currIndex < block.length) {
+		currIndex = block.length-1;
+		while (currIndex >= 0) {
 			if (block.charAt(currIndex) == '(') {
 				depth++;
 			} else if (block.charAt(currIndex) == ')') {
@@ -79,7 +79,7 @@ class MathParse {
 			} else if ((block.charAt(currIndex) == '/') && (depth == 0)) {
 				return MathParse.parse(block.substring(0, currIndex), xVal) / MathParse.parse(block.substring(currIndex + 1, block.length), xVal);
 			}
-			currIndex++;
+			currIndex--;
 		}
 		// Serching ^ operator outside brackets
 		depth = 0;
