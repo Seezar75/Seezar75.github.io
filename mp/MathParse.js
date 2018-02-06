@@ -46,20 +46,32 @@ function plot() {
 
 
 	//grid
-	for (let i = -10; i <= 10; i++) {
+	let step = Math.pow(10, 1-Math.floor(-0.3+Math.log10(scale)));
+	let y1 = Math.floor(startY + ((mousePosStart.y - mousePos.y) / scale) - ((endX - startX) * canvas.height / canvas.width));
+	let y2 = Math.floor((startY + (endX - startX) * canvas.height / canvas.width) + ((mousePosStart.y - mousePos.y) / scale) - ((endX - startX) * canvas.height / canvas.width));
+	for (let i = y1; i <= y2; i++) {
 		if (i == 0) {
 			ctx.strokeStyle = "black";
 		} else {
 			ctx.strokeStyle = "rgb(220,220,220)";
 		}
 		ctx.beginPath();
-		ctx.moveTo(0, canvas.height + (mousePos.y - mousePosStart.y - ((startY + i) * scale)));
-		ctx.lineTo(canvas.width, canvas.height + (mousePos.y - mousePosStart.y - ((startY + i) * scale)));
+		ctx.moveTo(0, canvas.height + (mousePos.y - mousePosStart.y - ((startY - i) * scale)));
+		ctx.lineTo(canvas.width, canvas.height + (mousePos.y - mousePosStart.y - ((startY - i) * scale)));
 		ctx.stroke();
+	}
 
+	let x1 = Math.floor(startX + ((mousePosStart.x - mousePos.x) / scale));
+	let x2 = Math.floor(endX + ((mousePosStart.x - mousePos.x) / scale));
+	for (let i = x1; i <= x2; i++) {
+		if (i == 0) {
+			ctx.strokeStyle = "black";
+		} else {
+			ctx.strokeStyle = "rgb(220,220,220)";
+		}
 		ctx.beginPath();
-		ctx.moveTo(mousePos.x - mousePosStart.x - ((startX + i) * scale), 0);
-		ctx.lineTo(mousePos.x - mousePosStart.x - ((startX + i) * scale), canvas.height);
+		ctx.moveTo(mousePos.x - mousePosStart.x - ((startX - i) * scale), 0);
+		ctx.lineTo(mousePos.x - mousePosStart.x - ((startX - i) * scale), canvas.height);
 		ctx.stroke();
 
 	}
