@@ -1,9 +1,30 @@
 window.onload = function() {
 	canvas = document.getElementById("myCanvas");
 	ctx = canvas.getContext("2d");
+	canvas.addEventListener('mousemove', mouseMoveHandler, false);
+	canvas.addEventListener('mousedown', mouseDownHandler, false);
+	canvas.addEventListener('mouseup', mouseUpHandler, false);
+	canvas.addEventListener("wheel", mouseWheelHandler, false);
+	mousePos = {
+		x: canvas.width / 2,
+		y: canvas.height / 2
+	}
+	mousePosStart = {
+		x: canvas.width / 2,
+		y: canvas.height / 2
+	}
+	plot();
 }
 
 let out;
+let startX = -5;
+let endX = 5;
+let startY = 2;
+let steps = 200;
+
+let mousePos;
+let mousePosStart;
+let mousePressed = false;
 
 function parseText() {
 	out = MathParse.parse(document.getElementById('expr').value.toLowerCase(), 1);
@@ -17,21 +38,85 @@ function parseT() {
 
 function plot() {
 	console.time("Plot time");
-	let steps = 100;
-	let scaleX = canvas.width / steps;
-	let scaleY = scaleX;
+	let scale = canvas.width / (endX - startX);
 	ctx.fillStyle = "white";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 	ctx.strokeStyle = "black";
 	ctx.strokeRect(0, 0, canvas.width, canvas.height);
+
+
+	//grid
+	for (let i = -10; i <= 10; i++) {
+		if (i == 0) {
+			ctx.strokeStyle = "black";
+		} else {
+			ctx.strokeStyle = "rgb(220,220,220)";
+		}
+		ctx.beginPath();
+		ctx.moveTo(0, canvas.height + (mousePos.y - mousePosStart.y - ((startY + i) * scale)));
+		ctx.lineTo(canvas.width, canvas.height + (mousePos.y - mousePosStart.y - ((startY + i) * scale)));
+		ctx.stroke();
+
+		ctx.beginPath();
+		ctx.moveTo(mousePos.x - mousePosStart.x - ((startX + i) * scale), 0);
+		ctx.lineTo(mousePos.x - mousePosStart.x - ((startX + i) * scale), canvas.height);
+		ctx.stroke();
+
+	}
+
 	ctx.beginPath();
 	ctx.strokeStyle = "red";
 	out = MathParse.parseTree(document.getElementById('expr').value.toLowerCase());
 	for (let i = 0; i <= steps; i++) {
-		ctx.lineTo(i * scaleX, canvas.height - (out.calculate(i) * scaleY));
+		let x = (startX + ((mousePosStart.x - mousePos.x) / scale)) + (i * ((endX - startX) / steps));
+		let y = mousePosStart.y - mousePos.y + (out.calculate(x) + startY) * scale;
+		ctx.lineTo(mousePos.x - mousePosStart.x + (x - startX) * scale, canvas.height - y);
 	}
 	ctx.stroke();
 	console.timeEnd("Plot time");
+}
+
+function mouseMoveHandler(evt) {
+	if (mousePressed) {
+		mousePos = getMousePos(canvas, evt);
+		plot();
+	}
+}
+
+function mouseDownHandler(evt) {
+	if (evt.button == 0) {
+		mousePressed = true;
+	}
+	mousePos = getMousePos(canvas, evt);
+	mousePosStart = mousePos;
+}
+
+function mouseUpHandler(evt) {
+	let scale = canvas.width / (endX - startX);
+	if (evt.button == 0) {
+		mousePressed = false;
+		startX += (mousePosStart.x - mousePos.x) / scale;
+		endX += (mousePosStart.x - mousePos.x) / scale;
+		startY += (mousePosStart.y - mousePos.y) / scale;
+		mousePosStart = mousePos;
+	}
+}
+
+function mouseWheelHandler(evt) {
+	let mp = getMousePos(canvas, evt);
+	let scale = canvas.width / (endX - startX);
+	startX -= (evt.deltaY * (endX - startX) / 1000) * (mp.x / canvas.width);
+	endX += evt.deltaY * (endX - startX) / 1000 * ((canvas.width - mp.x) / canvas.width);
+	startY += evt.deltaY * (endX - startX) / 1000 * ((canvas.height - mp.y) / canvas.height);
+	plot();
+}
+
+function getMousePos(canvas, evt) {
+	let rect = canvas.getBoundingClientRect();
+	return {
+		x: evt.clientX - rect.left,
+		y: evt.clientY - rect.top
+	};
 }
 
 class MathParse {
