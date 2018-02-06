@@ -1,31 +1,134 @@
 window.onload = function() {
 	canvas = document.getElementById("myCanvas");
 	ctx = canvas.getContext("2d");
+	canvas.addEventListener('mousemove', mouseMoveHandler, false);
+	canvas.addEventListener('mousedown', mouseDownHandler, false);
+	canvas.addEventListener('mouseup', mouseUpHandler, false);
+	canvas.addEventListener("wheel", mouseWheelHandler, false);
+	mousePos = {
+		x: canvas.width / 2,
+		y: canvas.height / 2
+	}
+	mousePosStart = {
+		x: canvas.width / 2,
+		y: canvas.height / 2
+	}
+	plot();
 }
 
+let out;
+let startX = -5;
+let endX = 5;
+let startY = 2;
+let steps = 200;
+
+let mousePos;
+let mousePosStart;
+let mousePressed = false;
+
 function parseText() {
-	let out = MathParse.parse(document.getElementById('expr').value.toLowerCase(), 0);
+	out = MathParse.parse(document.getElementById('expr').value.toLowerCase(), 1);
 	document.getElementById('output').value = out;
+}
+
+function parseT() {
+	out = MathParse.parseTree(document.getElementById('expr').value.toLowerCase(), 1);
+	document.getElementById('output').value = out.toString() + " = " + out.calculate(1);
 }
 
 function plot() {
 	console.time("Plot time");
-	let steps = 100;
-	let scaleX = canvas.width / steps;
-	let scaleY = scaleX;
-	let out = 0;
+	let scale = canvas.width / (endX - startX);
 	ctx.fillStyle = "white";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 	ctx.strokeStyle = "black";
 	ctx.strokeRect(0, 0, canvas.width, canvas.height);
+
+
+	//grid
+	let step = Math.pow(10, 1-Math.floor(-0.3+Math.log10(scale)));
+	let y1 = Math.floor(startY + ((mousePosStart.y - mousePos.y) / scale) - ((endX - startX) * canvas.height / canvas.width));
+	let y2 = Math.floor((startY + (endX - startX) * canvas.height / canvas.width) + ((mousePosStart.y - mousePos.y) / scale) - ((endX - startX) * canvas.height / canvas.width));
+	for (let i = y1; i <= y2; i++) {
+		if (i == 0) {
+			ctx.strokeStyle = "black";
+		} else {
+			ctx.strokeStyle = "rgb(220,220,220)";
+		}
+		ctx.beginPath();
+		ctx.moveTo(0, canvas.height + (mousePos.y - mousePosStart.y - ((startY - i) * scale)));
+		ctx.lineTo(canvas.width, canvas.height + (mousePos.y - mousePosStart.y - ((startY - i) * scale)));
+		ctx.stroke();
+	}
+
+	let x1 = Math.floor(startX + ((mousePosStart.x - mousePos.x) / scale));
+	let x2 = Math.floor(endX + ((mousePosStart.x - mousePos.x) / scale));
+	for (let i = x1; i <= x2; i++) {
+		if (i == 0) {
+			ctx.strokeStyle = "black";
+		} else {
+			ctx.strokeStyle = "rgb(220,220,220)";
+		}
+		ctx.beginPath();
+		ctx.moveTo(mousePos.x - mousePosStart.x - ((startX - i) * scale), 0);
+		ctx.lineTo(mousePos.x - mousePosStart.x - ((startX - i) * scale), canvas.height);
+		ctx.stroke();
+
+	}
+
 	ctx.beginPath();
 	ctx.strokeStyle = "red";
+	out = MathParse.parseTree(document.getElementById('expr').value.toLowerCase());
 	for (let i = 0; i <= steps; i++) {
-		out = MathParse.parse(document.getElementById('expr').value.toLowerCase(), i);
-		ctx.lineTo(i * scaleX, canvas.height - (out * scaleY));
+		let x = (startX + ((mousePosStart.x - mousePos.x) / scale)) + (i * ((endX - startX) / steps));
+		let y = mousePosStart.y - mousePos.y + (out.calculate(x) + startY) * scale;
+		ctx.lineTo(mousePos.x - mousePosStart.x + (x - startX) * scale, canvas.height - y);
 	}
 	ctx.stroke();
 	console.timeEnd("Plot time");
+}
+
+function mouseMoveHandler(evt) {
+	if (mousePressed) {
+		mousePos = getMousePos(canvas, evt);
+		plot();
+	}
+}
+
+function mouseDownHandler(evt) {
+	if (evt.button == 0) {
+		mousePressed = true;
+	}
+	mousePos = getMousePos(canvas, evt);
+	mousePosStart = mousePos;
+}
+
+function mouseUpHandler(evt) {
+	let scale = canvas.width / (endX - startX);
+	if (evt.button == 0) {
+		mousePressed = false;
+		startX += (mousePosStart.x - mousePos.x) / scale;
+		endX += (mousePosStart.x - mousePos.x) / scale;
+		startY += (mousePosStart.y - mousePos.y) / scale;
+		mousePosStart = mousePos;
+	}
+}
+
+function mouseWheelHandler(evt) {
+	let mp = getMousePos(canvas, evt);
+	let scale = canvas.width / (endX - startX);
+	startX -= (evt.deltaY * (endX - startX) / 1000) * (mp.x / canvas.width);
+	endX += evt.deltaY * (endX - startX) / 1000 * ((canvas.width - mp.x) / canvas.width);
+	startY += evt.deltaY * (endX - startX) / 1000 * ((canvas.height - mp.y) / canvas.height);
+	plot();
+}
+
+function getMousePos(canvas, evt) {
+	let rect = canvas.getBoundingClientRect();
+	return {
+		x: evt.clientX - rect.left,
+		y: evt.clientY - rect.top
+	};
 }
 
 class MathParse {
@@ -151,4 +254,179 @@ class MathParse {
 			return 0;
 		}
 	}
+
+	static parseTree(block) {
+		let currIndex = 0;
+		let result = 0;
+		let depth = 0;
+		// Handle double negatives
+		while (block.indexOf('--') != -1 || block.indexOf('-+') != -1) {
+			block = block.replace("--", "+");
+			block = block.replace("-+", "-");
+		}
+		// Check for simple number
+		if (block.indexOf('+') == -1 &&
+			block.indexOf('-') == -1 &&
+			block.indexOf('*') == -1 &&
+			block.indexOf('/') == -1 &&
+			block.indexOf('^') == -1 &&
+			block.indexOf('(') == -1 &&
+			block.indexOf(')') == -1) {
+			if (block == "" || block == null) {
+				// handles negative numbers
+				return new Operation("N", 0);
+			} else if (block == "x") {
+				return new Operation("X", 0);
+			} else {
+				return new Operation("N", Number(block));
+			}
+		}
+		// Serching + or - operator outside brackets
+		depth = 0;
+		currIndex = block.length - 1;
+		while (currIndex >= 0) {
+			if (block.charAt(currIndex) == '(') {
+				depth++;
+			} else if (block.charAt(currIndex) == ')') {
+				depth--;
+			} else if ((block.charAt(currIndex) == '+') && (depth == 0)) {
+				let add = new Operation("+", 0);
+				add.children[0] = MathParse.parseTree(block.substring(0, currIndex));
+				add.children[1] = MathParse.parseTree(block.substring(currIndex + 1, block.length));
+				return add;
+				//return MathParse.parse(block.substring(0, currIndex), xVal) + MathParse.parse(block.substring(currIndex + 1, block.length), xVal);
+			} else if ((block.charAt(currIndex) == '-') && (depth == 0)) {
+				let sub = new Operation("-", 0);
+				sub.children[0] = MathParse.parseTree(block.substring(0, currIndex));
+				sub.children[1] = MathParse.parseTree(block.substring(currIndex + 1, block.length));
+				return sub;
+			}
+			currIndex--;
+		}
+		// Serching * or / operator outside brackets
+		depth = 0;
+		currIndex = block.length - 1;
+		while (currIndex >= 0) {
+			if (block.charAt(currIndex) == '(') {
+				depth++;
+			} else if (block.charAt(currIndex) == ')') {
+				depth--;
+			} else if ((block.charAt(currIndex) == '*') && (depth == 0)) {
+				let mult = new Operation("*", 0);
+				mult.children[0] = MathParse.parseTree(block.substring(0, currIndex));
+				mult.children[1] = MathParse.parseTree(block.substring(currIndex + 1, block.length));
+				return mult;
+			} else if ((block.charAt(currIndex) == '/') && (depth == 0)) {
+				let div = new Operation("/", 0);
+				div.children[0] = MathParse.parseTree(block.substring(0, currIndex));
+				div.children[1] = MathParse.parseTree(block.substring(currIndex + 1, block.length));
+				return div;
+			}
+			currIndex--;
+		}
+		// Serching ^ operator outside brackets
+		depth = 0;
+		currIndex = 0;
+		while (currIndex < block.length) {
+			if (block.charAt(currIndex) == '(') {
+				depth++;
+			} else if (block.charAt(currIndex) == ')') {
+				depth--;
+			} else if ((block.charAt(currIndex) == '^') && (depth == 0)) {
+				let pow = new Operation("^", 0);
+				pow.children[0] = MathParse.parseTree(block.substring(0, currIndex));
+				pow.children[1] = MathParse.parseTree(block.substring(currIndex + 1, block.length));
+				return pow;
+			}
+			currIndex++;
+		}
+		// Verify all the brackets
+		if (depth != 0) {
+			console.log(depth);
+			console.log("Errore, parentesi non coerenti!!!");
+		}
+		// No operator outside brackets
+		if (block.indexOf('(') == 0) {
+			// Block with only brackets
+			let par = new Operation("()", 0)
+			par.children[0] = MathParse.parseTree(block.substring(1, block.length - 1));
+			return par;
+		} else {
+			// Block with Math operation
+			let oper = block.substring(0, block.indexOf('('));
+			if ("sin" === oper) {
+				let op = new Operation("sin", 0)
+				op.children[0] = MathParse.parseTree(block.substring(block.indexOf('(') + 1, block.length - 1));
+				return op;
+			} else if ("sinh" === oper) {
+				let op = new Operation("sinh", 0)
+				op.children[0] = MathParse.parseTree(block.substring(block.indexOf('(') + 1, block.length - 1));
+				return op;
+			} else if ("cos" === oper) {
+				let op = new Operation("cos", 0)
+				op.children[0] = MathParse.parseTree(block.substring(block.indexOf('(') + 1, block.length - 1));
+				return op;
+			} else if ("cosh" === oper) {
+				let op = new Operation("cosh", 0)
+				op.children[0] = MathParse.parseTree(block.substring(block.indexOf('(') + 1, block.length - 1));
+				return op;
+			} else if ("asin" === oper) {
+				let op = new Operation("asin", 0)
+				op.children[0] = MathParse.parseTree(block.substring(block.indexOf('(') + 1, block.length - 1));
+				return op;
+			} else if ("asinh" === oper) {
+				let op = new Operation("asinh", 0)
+				op.children[0] = MathParse.parseTree(block.substring(block.indexOf('(') + 1, block.length - 1));
+				return op;
+			} else if ("acos" === oper) {
+				let op = new Operation("acos", 0)
+				op.children[0] = MathParse.parseTree(block.substring(block.indexOf('(') + 1, block.length - 1));
+				return op;
+			} else if ("acosh" === oper) {
+				let op = new Operation("acosh", 0)
+				op.children[0] = MathParse.parseTree(block.substring(block.indexOf('(') + 1, block.length - 1));
+				return op;
+			} else if ("tan" === oper) {
+				let op = new Operation("tan", 0)
+				op.children[0] = MathParse.parseTree(block.substring(block.indexOf('(') + 1, block.length - 1));
+				return op;
+			} else if ("tanh" === oper) {
+				let op = new Operation("tanh", 0)
+				op.children[0] = MathParse.parseTree(block.substring(block.indexOf('(') + 1, block.length - 1));
+				return op;
+			} else if ("atan" === oper) {
+				let op = new Operation("atan", 0)
+				op.children[0] = MathParse.parseTree(block.substring(block.indexOf('(') + 1, block.length - 1));
+				return op;
+			} else if ("atanh" === oper) {
+				let op = new Operation("atanh", 0)
+				op.children[0] = MathParse.parseTree(block.substring(block.indexOf('(') + 1, block.length - 1));
+				return op;
+			} else if ("sqrt" === oper) {
+				let op = new Operation("sqrt", 0)
+				op.children[0] = MathParse.parseTree(block.substring(block.indexOf('(') + 1, block.length - 1));
+				return op;
+			} else if ("log" === oper) {
+				let op = new Operation("log", 0)
+				op.children[0] = MathParse.parseTree(block.substring(block.indexOf('(') + 1, block.length - 1));
+				return op;
+			} else if ("log10" === oper) {
+				let op = new Operation("log10", 0)
+				op.children[0] = MathParse.parseTree(block.substring(block.indexOf('(') + 1, block.length - 1));
+				return op;
+			} else if ("log2" === oper) {
+				let op = new Operation("log2", 0)
+				op.children[0] = MathParse.parseTree(block.substring(block.indexOf('(') + 1, block.length - 1));
+				return op;
+			} else if ("exp" === oper) {
+				let op = new Operation("exp", 0)
+				op.children[0] = MathParse.parseTree(block.substring(block.indexOf('(') + 1, block.length - 1));
+				return op;
+			} else {
+				console.log("Funzione non riconosciuta");
+			}
+			return 0;
+		}
+	}
+
 }
