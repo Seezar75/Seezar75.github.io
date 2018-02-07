@@ -53,9 +53,8 @@ function plot() {
 	let step = Math.pow(10, 2 - Math.floor(0.5 + Math.log10(scale)));
 	let digits = Math.log10(1 / step);
 	if (digits < 0) digits = 0;
-	console.log(step);
-	let y1 = Math.floor((startY + ((mousePosStart.y - mousePos.y) / scale) - ((endX - startX) * canvas.height / canvas.width)) / step);
-	let y2 = Math.floor(((startY + (endX - startX) * canvas.height / canvas.width) + ((mousePosStart.y - mousePos.y) / scale) - ((endX - startX) * canvas.height / canvas.width)) / step);
+	let y1 = Math.floor(((scale * startY) - mousePos.y + mousePosStart.y - canvas.height) / (scale * step));
+	let y2 = Math.floor(((scale * startY) - mousePos.y + mousePosStart.y) / (scale * step));
 	for (let i = y1; i <= y2; i++) {
 		if (i == 0) {
 			ctx.strokeStyle = "black";
@@ -129,7 +128,6 @@ function mouseUpHandler(evt) {
 		startY += (mousePosStart.y - mousePos.y) / scale;
 		mousePosStart.x = mousePos.x;
 		mousePosStart.y = mousePos.y;
-		console.log("Mouse Released");
 		plot();
 	}
 }
