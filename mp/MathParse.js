@@ -1,6 +1,7 @@
 window.onload = function() {
 	canvas = document.getElementById("myCanvas");
 	ctx = canvas.getContext("2d");
+	document.addEventListener("keydown", keyDownHandler, false);
 	canvas.addEventListener('mousemove', mouseMoveHandler, false);
 	canvas.addEventListener('mousedown', mouseDownHandler, false);
 	canvas.addEventListener('mouseup', mouseUpHandler, false);
@@ -44,11 +45,17 @@ function plot() {
 	ctx.strokeStyle = "black";
 	ctx.strokeRect(0, 0, canvas.width, canvas.height);
 
+	ctx.font = "10px Arial";
+	ctx.fillStyle = "black";
+	let txt;
 
 	//grid
-	let step = Math.pow(10, 1-Math.floor(-0.3+Math.log10(scale)));
-	let y1 = Math.floor(startY + ((mousePosStart.y - mousePos.y) / scale) - ((endX - startX) * canvas.height / canvas.width));
-	let y2 = Math.floor((startY + (endX - startX) * canvas.height / canvas.width) + ((mousePosStart.y - mousePos.y) / scale) - ((endX - startX) * canvas.height / canvas.width));
+	let step = Math.pow(10, 2 - Math.floor(0.5 + Math.log10(scale)));
+	let digits = Math.log10(1 / step);
+	if (digits < 0) digits = 0;
+	console.log(step);
+	let y1 = Math.floor((startY + ((mousePosStart.y - mousePos.y) / scale) - ((endX - startX) * canvas.height / canvas.width)) / step);
+	let y2 = Math.floor(((startY + (endX - startX) * canvas.height / canvas.width) + ((mousePosStart.y - mousePos.y) / scale) - ((endX - startX) * canvas.height / canvas.width)) / step);
 	for (let i = y1; i <= y2; i++) {
 		if (i == 0) {
 			ctx.strokeStyle = "black";
@@ -56,13 +63,19 @@ function plot() {
 			ctx.strokeStyle = "rgb(220,220,220)";
 		}
 		ctx.beginPath();
-		ctx.moveTo(0, canvas.height + (mousePos.y - mousePosStart.y - ((startY - i) * scale)));
-		ctx.lineTo(canvas.width, canvas.height + (mousePos.y - mousePosStart.y - ((startY - i) * scale)));
+		ctx.moveTo(0, canvas.height + (mousePos.y - mousePosStart.y - ((startY - (i * step)) * scale)));
+		ctx.lineTo(canvas.width, canvas.height + (mousePos.y - mousePosStart.y - ((startY - (i * step)) * scale)));
 		ctx.stroke();
-	}
 
-	let x1 = Math.floor(startX + ((mousePosStart.x - mousePos.x) / scale));
-	let x2 = Math.floor(endX + ((mousePosStart.x - mousePos.x) / scale));
+		ctx.textAlign = "left";
+		txt = -i * step;
+		ctx.fillText(txt.toFixed(digits), 5, canvas.height + (mousePos.y - mousePosStart.y - ((startY - (i * step)) * scale)) - 1);
+
+	}
+	let scale2 = scale * step;
+	let x1 = Math.floor((startX + ((mousePosStart.x - mousePos.x) / scale)) / step);
+	let x2 = Math.floor((endX + ((mousePosStart.x - mousePos.x) / scale)) / step);
+
 	for (let i = x1; i <= x2; i++) {
 		if (i == 0) {
 			ctx.strokeStyle = "black";
@@ -70,9 +83,13 @@ function plot() {
 			ctx.strokeStyle = "rgb(220,220,220)";
 		}
 		ctx.beginPath();
-		ctx.moveTo(mousePos.x - mousePosStart.x - ((startX - i) * scale), 0);
-		ctx.lineTo(mousePos.x - mousePosStart.x - ((startX - i) * scale), canvas.height);
+		ctx.moveTo((mousePos.x - mousePosStart.x - ((startX - (i * step)) * scale)), 0);
+		ctx.lineTo((mousePos.x - mousePosStart.x - ((startX - (i * step)) * scale)), canvas.height);
 		ctx.stroke();
+
+		ctx.textAlign = "center";
+		txt = -i * step;
+		ctx.fillText(txt.toFixed(digits), (mousePos.x - mousePosStart.x - ((startX - (i * step)) * scale)), canvas.height - 5);
 
 	}
 
@@ -110,7 +127,10 @@ function mouseUpHandler(evt) {
 		startX += (mousePosStart.x - mousePos.x) / scale;
 		endX += (mousePosStart.x - mousePos.x) / scale;
 		startY += (mousePosStart.y - mousePos.y) / scale;
-		mousePosStart = mousePos;
+		mousePosStart.x = mousePos.x;
+		mousePosStart.y = mousePos.y;
+		console.log("Mouse Released");
+		plot();
 	}
 }
 
@@ -129,6 +149,21 @@ function getMousePos(canvas, evt) {
 		x: evt.clientX - rect.left,
 		y: evt.clientY - rect.top
 	};
+}
+
+function keyDownHandler(evt) {
+	if (evt.keyCode == 38) { // up
+		startX -= (endX - startX) / 10;
+		endX += (endX - startX) / 10;
+		startY += (endX - startX) / 10;
+		plot();
+	} else if (evt.keyCode == 40) { // down
+		startX += (endX - startX) / 10;
+		endX -= (endX - startX) / 10;
+		startY -= (endX - startX) / 10;
+		plot();
+	}
+
 }
 
 class MathParse {
