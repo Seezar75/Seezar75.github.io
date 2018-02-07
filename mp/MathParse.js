@@ -88,7 +88,7 @@ function plot() {
 		ctx.stroke();
 
 		ctx.textAlign = "center";
-		txt = -i * step;
+		txt = i * step;
 		ctx.fillText(txt.toFixed(digits), (mousePos.x - mousePosStart.x - ((startX - (i * step)) * scale)), canvas.height - 5);
 
 	}
