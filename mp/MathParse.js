@@ -1,5 +1,5 @@
 window.onload = function() {
-	canvas = document.getElementById("myCanvas");
+	canvas = document.getElementById("plotCanvas");
 	ctx = canvas.getContext("2d");
 	document.addEventListener("keydown", keyDownHandler, false);
 	canvas.addEventListener('mousemove', mouseMoveHandler, false);
@@ -15,6 +15,7 @@ window.onload = function() {
 		y: canvas.height / 2
 	}
 	plot();
+	draw();
 }
 
 let out;
@@ -162,6 +163,57 @@ function keyDownHandler(evt) {
 		plot();
 	}
 
+}
+
+function draw() {
+	// sin(1+1+tanh(x)+(1+1)+(x*5)) example function
+	let maxL = out.getMaxLevel(1);
+	let ca = document.getElementById("drawCanvas");
+	let ct = ca.getContext("2d");
+	ct.fillStyle = "white";
+	ct.fillRect(0, 0, ca.width, ca.height);
+	ct.strokeStyle = "black";
+	ct.strokeRect(0, 0, ca.width, ca.height);
+
+	// Tree graph initialization
+	out.setLevel(-1);
+	let j = 1;
+	for (let i = 0; i < maxL; i++) {
+		//console.log("Nodes at level " + i);
+		let arr = out.getNodesAtLevel(i);
+
+		for (let n of arr) {
+			n.draw(ca, (ca.width / 2) + (40 * (j - 1)) - (40 * (arr.length - 1) / 2));
+			j++
+		}
+		j = 1;
+	}
+
+	for (let k = 0; k < 300; k++) {
+		ct.fillStyle = "white";
+		ct.fillRect(0, 0, ca.width, ca.height);
+		ct.strokeStyle = "black";
+		ct.strokeRect(0, 0, ca.width, ca.height);
+		out.draw(ca, out.pos.x);
+		for (let i = 1; i < maxL; i++) {
+			//console.log("Nodes at level " + i);
+			let arr = out.getNodesAtLevel(i);
+			for (let n of arr) {
+				let newX = n.pos.x + (n.parent.pos.x - n.pos.x) / 70;
+				for (let m of arr) {
+					if (n != m) {
+						let dist = m.pos.x - n.pos.x;
+						if (dist < 40 && dist > -40) {
+							newX -= dist / 10;
+						}
+					}
+				}
+				n.draw(ca, newX);
+				j++
+			}
+			j = 1;
+		}
+	}
 }
 
 class MathParse {
@@ -456,7 +508,7 @@ class MathParse {
 				op.children[0] = MathParse.parseTree(block.substring(block.indexOf('(') + 1, block.length - 1));
 				return op;
 			} else {
-				console.log("Funzione non riconosciuta");
+				console.log("Funzione non riconosciuta: " + oper);
 			}
 			return 0;
 		}
