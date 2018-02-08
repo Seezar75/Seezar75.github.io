@@ -135,9 +135,9 @@ function mouseUpHandler(evt) {
 function mouseWheelHandler(evt) {
 	let mp = getMousePos(canvas, evt);
 	let scale = canvas.width / (endX - startX);
-	startX -= (evt.deltaY * (endX - startX) / 1000) * (mp.x / canvas.width);
-	endX += evt.deltaY * (endX - startX) / 1000 * ((canvas.width - mp.x) / canvas.width);
-	startY += evt.deltaY * (endX - startX) / 1000 * ((canvas.height - mp.y) / canvas.height);
+	startX -= evt.deltaY / 1000 * mp.x / scale;
+	endX += evt.deltaY / 1000 * (canvas.width - mp.x) / scale;
+	startY += evt.deltaY / 1000 * (canvas.height - mp.y) / scale;
 	plot();
 }
 
