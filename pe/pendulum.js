@@ -1,49 +1,40 @@
-window.onload = function() {
-	canvas = document.getElementById("myCanvas");
-	ctx = canvas.getContext("2d");
-	setup();
-	setInterval(loop, dt);
-}
+class pendulum {
 
-let canvas;
-let ctx;
-let ang;
-let vAng;
-let len = 200;
-let fps = 60;
-let dt = 1000 / fps;
+	constructor(can, base, length, startAng) {
+		this.ctx = canvas.getContext("2d");
+		this.base = base;
+		this.ang = startAng;
+		this.vAng = 0;
+		this.len = length;
+	}
 
-function setup() {
-	ang = Math.PI / 3;
-	vAng = 0;
-}
 
-function loop() {
+	draw() {
+		let x = this.base.x + (this.len * Math.sin(this.ang));
+		let y = this.base.y + (this.len * Math.cos(this.ang));
 
-  // Clear canvas
-	ctx.fillStyle = "black";
-	ctx.fillRect(0, 0, canvas.width, canvas.height);
+		// Draw cord
+		this.ctx.strokeStyle = "rgb(30,30,30)";
+		this.ctx.beginPath();
+		this.ctx.moveTo(x, y);
+		this.ctx.lineTo(this.base.x, this.base.y);
+		this.ctx.stroke();
 
-	let x = (canvas.width / 2) + (len * Math.sin(ang));
-	let y = 150 - (len * Math.cos(ang));
+		// Draw bob
+		this.ctx.beginPath();
+		this.ctx.arc(x, y, 10, 0, Math.PI * 2);
+		this.ctx.fillStyle = "rgb(230,0,0)";
+		this.ctx.fill();
+	}
 
-  // Draw cord
-	ctx.strokeStyle = "red";
-	ctx.beginPath();
-	ctx.moveTo(x, y);
-	ctx.lineTo(canvas.width / 2, 150);
-	ctx.stroke();
+	move(dt) {
+		// Gravity
+		let gr = (-0.0030 / this.len) * Math.sin(this.ang);
+		// Friction (fluid)
+		let fr = this.len * this.vAng / 60000000;
 
-  // Draw bob
-	ctx.beginPath();
-	ctx.arc(x, y, 10, 0, Math.PI * 2);
-	ctx.fillStyle = "red";
-	ctx.fill();
+		this.vAng += (gr - fr) * dt;
 
-	// Gravity
-	vAng += (0.001 / len) * Math.sin(ang) * dt;
-	// Friction (fluid)
-	vAng -= (vAng / 30000) * dt;
-
-	ang += vAng * dt;
+		this.ang += this.vAng * dt;
+	}
 }
