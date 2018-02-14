@@ -14,11 +14,12 @@ window.onload = function() {
 		x: canvas.width / 2,
 		y: canvas.height / 2
 	}
-	plot();
-	draw();
+	setup();
 }
 
 let out;
+let outs = [];
+let formulas = [];
 let startX = -5;
 let endX = 5;
 let startY = 2;
@@ -27,6 +28,8 @@ let steps = 200;
 let mousePos;
 let mousePosStart;
 let mousePressed = false;
+
+let rows = 0;
 
 function parseText() {
 	out = MathParse.parse(document.getElementById('expr').value.toLowerCase(), 1);
@@ -93,15 +96,18 @@ function plot() {
 
 	}
 
-	ctx.beginPath();
-	ctx.strokeStyle = "red";
-	out = MathParse.parseTree(document.getElementById('expr').value.toLowerCase());
-	for (let i = 0; i <= steps; i++) {
-		let x = (startX + ((mousePosStart.x - mousePos.x) / scale)) + (i * ((endX - startX) / steps));
-		let y = mousePosStart.y - mousePos.y + (out.calculate(x) + startY) * scale;
-		ctx.lineTo(mousePos.x - mousePosStart.x + (x - startX) * scale, canvas.height - y);
+	for (let o of outs) {
+		if (o == "") continue;
+		ctx.beginPath();
+		//out = MathParse.parseTree(document.getElementById('expr').value.toLowerCase());
+		ctx.strokeStyle = o.color;
+		for (let i = 0; i <= steps; i++) {
+			let x = (startX + ((mousePosStart.x - mousePos.x) / scale)) + (i * ((endX - startX) / steps));
+			let y = mousePosStart.y - mousePos.y + (o.calculate(x) + startY) * scale;
+			ctx.lineTo(mousePos.x - mousePosStart.x + (x - startX) * scale, canvas.height - y);
+		}
+		ctx.stroke();
 	}
-	ctx.stroke();
 	console.timeEnd("Plot time");
 }
 
@@ -140,6 +146,7 @@ function mouseWheelHandler(evt) {
 	endX += evt.deltaY / 1000 * (canvas.width - mp.x) / scale;
 	startY += evt.deltaY / 1000 * (canvas.height - mp.y) / scale;
 	plot();
+	evt.preventDefault();
 }
 
 function getMousePos(canvas, evt) {
@@ -167,7 +174,7 @@ function keyDownHandler(evt) {
 
 function draw() {
 	// sin(1+1+tanh(x)+(1+1)+(x*5)) example function
-	let maxL = out.getMaxLevel(1);
+	let maxL = outs[0].getMaxLevel(1);
 	let ca = document.getElementById("drawCanvas");
 	let ct = ca.getContext("2d");
 	ct.fillStyle = "white";
@@ -176,11 +183,11 @@ function draw() {
 	ct.strokeRect(0, 0, ca.width, ca.height);
 
 	// Tree graph initialization
-	out.setLevel(-1);
+	outs[0].setLevel(-1);
 	let j = 1;
 	for (let i = 0; i < maxL; i++) {
 		//console.log("Nodes at level " + i);
-		let arr = out.getNodesAtLevel(i);
+		let arr = outs[0].getNodesAtLevel(i);
 
 		for (let n of arr) {
 			n.draw(ca, (ca.width / 2) + (40 * (j - 1)) - (40 * (arr.length - 1) / 2));
@@ -194,10 +201,10 @@ function draw() {
 		ct.fillRect(0, 0, ca.width, ca.height);
 		ct.strokeStyle = "black";
 		ct.strokeRect(0, 0, ca.width, ca.height);
-		out.draw(ca, out.pos.x);
+		outs[0].draw(ca, outs[0].pos.x);
 		for (let i = 1; i < maxL; i++) {
 			//console.log("Nodes at level " + i);
-			let arr = out.getNodesAtLevel(i);
+			let arr = outs[0].getNodesAtLevel(i);
 			for (let n of arr) {
 				let newX = n.pos.x + (n.parent.pos.x - n.pos.x) / 70;
 				for (let m of arr) {
@@ -214,6 +221,82 @@ function draw() {
 			j = 1;
 		}
 	}
+}
+
+
+function setup() {
+	addRow();
+	addRow();
+}
+
+function update(id) {
+	outs[id] = MathParse.parseTree(formulas[id].value);
+	setColor(id);
+	plot();
+	draw();
+}
+
+function addRow() {
+	let mainDiv = document.getElementById("mainDiv");
+	let innerDiv = document.createElement('div');
+	innerDiv.setAttribute('id', 'row' + rows);
+	innerDiv.setAttribute('class', 'formula');
+
+	let formula = document.createElement('input');
+	formula.setAttribute('type', 'text');
+	formula.setAttribute('size', '35');
+	if (rows != 0) {
+		formula.setAttribute('value', 'x');
+	} else {
+		formula.setAttribute('value', '(1+x+log(x^2)*x)^2/(x^4+1)');
+	}
+	formula.setAttribute('onchange', 'update(' + rows + ');');
+	innerDiv.appendChild(formula);
+	formulas.push(formula);
+
+	let colorPic = document.createElement('input');
+	colorPic.setAttribute('id', 'color' + rows);
+	colorPic.setAttribute('type', 'color');
+	colorPic.setAttribute('onchange', 'setColor(' + rows + ')');
+	if (rows != 0) {
+		colorPic.setAttribute('value', '#000000');
+	} else {
+		colorPic.setAttribute('value', '#ff0000');
+	}
+	innerDiv.appendChild(colorPic);
+
+	if (rows != 0) {
+		let minusButton = document.createElement('input');
+		minusButton.setAttribute('type', 'button');
+		minusButton.setAttribute('value', '-');
+		minusButton.setAttribute('onclick', 'removeRow(' + rows + ')');
+		innerDiv.appendChild(minusButton);
+	}
+
+	mainDiv.appendChild(innerDiv);
+	rows++;
+
+	let o = MathParse.parseTree(formula.value);
+	outs.push(o);
+	o.color = colorPic.value;
+
+	plot();
+	draw();
+}
+
+function removeRow(id) {
+	formulas[id] = "";
+	outs[id] = "";
+	let element = document.getElementById('row' + id);
+	element.parentNode.removeChild(element);
+	plot();
+}
+
+function setColor(id) {
+	let element = document.getElementById('color' + id);
+	//out.color = element.value;
+	outs[id].color = element.value;
+	plot();
 }
 
 class MathParse {
