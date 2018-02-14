@@ -10,6 +10,7 @@ class Operation {
 		};
 		this.level = 0;
 		this.parent;
+		this.color = "#FF0000";
 	}
 
 	calculate(xVal) {

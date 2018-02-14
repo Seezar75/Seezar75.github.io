@@ -1,18 +1,27 @@
 <html>
 <script type="text/javascript" src="MathParse.js"></script>
 <script type="text/javascript" src="operation.js"></script>
+<style>
+  div.formula {
+    width: 500px;
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 5px;
+    margin: 5px;
+  }
+</style>
 <br/>
-<input type="text" name="expr" id="expr" size="35" value="(1+x+log(x^2)*x)^2"> =&gt
-<input type="text" name="output" id="output" size="40">
-<br/>
-<br/>
-<button onclick="parseText();">Calculate</button>
-<button onclick="parseT();">Parse</button>
-<button onclick="plot();draw();">Update</button>
-<br/>
-<br/>
+
 <canvas id="plotCanvas" width="600" height="400"></canvas>
 <canvas id="drawCanvas" width="400" height="400"></canvas>
+
+<br/>
+<div id="mainDiv">
+
+</div>
+<div class="formula">
+  <button onclick="addRow();">+</button>
+</div>
 <br/>
 
 </html>
