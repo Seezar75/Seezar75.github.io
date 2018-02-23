@@ -26,6 +26,7 @@ let mousePressed = false;
 let mousePosStart;
 let mousePosEnd;
 let maxRad = 30;
+let wallStart = null;
 
 let bounce = 0;
 let bounceOthers = 0;
@@ -51,6 +52,7 @@ let v2;
 function setup() {
 
 	ctx.font = "12px Comic Sans MS";
+	ctx.lineCap = "round";
 
 	for (let i = 0; i < 10; i++) {
 		serpentelli.push(new Serpentello(getRandomInt(0, canvas.width), getRandomInt(0, canvas.height), 0.5 + Math.random() * 6, Math.random() * Math.PI * 2, getRandomInt(5, maxRad)));
@@ -58,16 +60,6 @@ function setup() {
 
 	// sorting so smaller ones will be drawn on top
 	serpentelli.sort((a, b) => b.size - a.size);
-
-	/*
-	walls.push(new Wall({
-		x: 500,
-		y: 200
-	}, {
-		x: 400,
-		y: 400
-	}));
-	*/
 
 }
 
@@ -175,6 +167,15 @@ function loop() {
 		ctx.closePath();
 	}
 
+	if (wallStart != null) {
+		ctx.beginPath();
+		ctx.strokeStyle = "rgba(255, 0, 0, 0.4)";
+		ctx.lineWidth = 5;
+		ctx.moveTo(wallStart.x,wallStart.y);
+		ctx.lineTo(mousePos.x, mousePos.y);
+		ctx.stroke();
+	}
+
 }
 
 function keyDownHandler(evt) {
@@ -213,8 +214,9 @@ function keyUpHandler(evt) {
 			bounce = 0;
 		}
 	} else if (evt.keyCode == 67) { // C
-		// Clear obstacles
+		// Clear obstacles and walls
 		obstacles = [];
+		walls = [];
 	} else if (evt.keyCode == 70) { // F
 		// Toggle follow mouse
 		if (follow == 0) {
@@ -242,6 +244,7 @@ function keyUpHandler(evt) {
 			"O: place an obstacle at mouse position\n" +
 			"P: pause animation\n" +
 			"R: toggle serpentelli bouncing with each other\n" +
+			"W: draw walls, W to start, move mouse and then W again to end\n" +
 			"Numpad +: increase distance\n" +
 			"Numpad -: decrease distance\n\n" +
 			"Click and drag to create another serpentello\n" +
@@ -268,6 +271,20 @@ function keyUpHandler(evt) {
 			grouping = 0;
 		} else {
 			bounceOthers = 0;
+		}
+	} else if (evt.keyCode == 87) { // W
+		// Draw wall
+		if (wallStart == null) {
+			wallStart = {
+				x: mousePos.x,
+				y: mousePos.y
+			}
+		} else {
+			walls.push(new Wall(wallStart, {
+				x: mousePos.x,
+				y: mousePos.y
+			}));
+			wallStart = null;
 		}
 	} else if (evt.keyCode == 107) { // NumPad +
 		// Increase distance

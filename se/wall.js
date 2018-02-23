@@ -7,6 +7,7 @@ class Wall {
 	draw() {
 		ctx.beginPath();
 		ctx.strokeStyle = "rgb(255,0,0)";
+		ctx.lineWidth=5;
 		ctx.moveTo(this.p1.x, this.p1.y);
 		ctx.lineTo(this.p2.x, this.p2.y);
 		ctx.stroke();
@@ -25,17 +26,16 @@ class Wall {
     let v = new Vector(0,0);
     let dy = this.p2.y - this.p1.y;
 		let dx = this.p2.x - this.p1.x
-		let m = dy / dx;
 		let dl = (dy * p.x - dx * p.y + this.p2.x * this.p1.y - this.p2.y * this.p1.x) / Math.sqrt(dy * dy + dx * dx);
     let d1 = Math.sqrt((p.x-this.p1.x)*(p.x-this.p1.x)+(p.y-this.p1.y)*(p.y-this.p1.y));
     let d2 = Math.sqrt((p.x-this.p2.x)*(p.x-this.p2.x)+(p.y-this.p2.y)*(p.y-this.p2.y));
     let ds = Math.sqrt((this.p1.x-this.p2.x)*(this.p1.x-this.p2.x)+(this.p1.y-this.p2.y)*(this.p1.y-this.p2.y));
     if ((d1*d1-dl*dl)+(d2*d2-dl*dl) < ds*ds) {
       // Segment
-      if (Math.abs(dl) < s) {
+      if (Math.abs(dl) < s+5) {
         v = new Vector(dx,dy);
         v.multiply(v90);
-        v.multiplyScalar(2/dl/Math.abs(dl));
+        v.multiplyScalar(1.5/(dl+5)/Math.abs(dl+5));
       }
     } else {
       if (d1 < d2) {
