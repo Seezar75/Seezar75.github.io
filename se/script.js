@@ -78,7 +78,7 @@ function loop() {
 	ctx.fillStyle = "black";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-	// bounce with each other
+	/* bounce with each other
 	if (bounceOthers == 1) {
 		for (let i = 0; i < serpentelli.length - 1; i++) {
 			for (let j = i + 1; j < serpentelli.length; j++) {
@@ -102,6 +102,7 @@ function loop() {
 			}
 		}
 	}
+	*/
 
 	for (let s of serpentelli) {
 
@@ -209,6 +210,7 @@ function keyUpHandler(evt) {
 		// Toggle grouping
 		if (grouping == 0) {
 			grouping = 1;
+			bounceOthers = 0;
 		} else {
 			grouping = 0;
 		}
@@ -247,6 +249,7 @@ function keyUpHandler(evt) {
 		// Serpentelli bouncing with each other
 		if (bounceOthers == 0) {
 			bounceOthers = 1;
+			grouping = 0;
 		} else {
 			bounceOthers = 0;
 		}
