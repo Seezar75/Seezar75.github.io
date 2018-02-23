@@ -143,6 +143,12 @@ class Serpentello {
 			this.velVect.add(otherVect);
 		}
 
+		// Avoid walls
+		for (let w of walls) {
+			let f = w.getForceVector({x:this.x, y:this.y}, this.size);
+			this.velVect.add(f);
+		}
+
 		// Aligning and matching speeds
 		if (aligning == 1) {
 			let alignVect = new Vector(0, 0);

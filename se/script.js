@@ -43,6 +43,7 @@ rightPressed = leftPressed = upPressed = downPressed = false;
 
 let serpentelli = [];
 let obstacles = [];
+let walls = [];
 
 let v;
 let v2;
@@ -57,6 +58,16 @@ function setup() {
 
 	// sorting so smaller ones will be drawn on top
 	serpentelli.sort((a, b) => b.size - a.size);
+
+	/*
+	walls.push(new Wall({
+		x: 500,
+		y: 200
+	}, {
+		x: 400,
+		y: 400
+	}));
+	*/
 
 }
 
@@ -118,6 +129,10 @@ function loop() {
 		s.draw();
 	}
 
+	for (let w of walls) {
+		w.draw();
+	}
+
 	for (let o of obstacles) {
 		ctx.beginPath();
 		ctx.arc(o.x, o.y, 10, 0, Math.PI * 2);
@@ -159,6 +174,7 @@ function loop() {
 		ctx.fill();
 		ctx.closePath();
 	}
+
 }
 
 function keyDownHandler(evt) {
