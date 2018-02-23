@@ -244,7 +244,7 @@ function addRow() {
 
 	let formula = document.createElement('input');
 	formula.setAttribute('type', 'text');
-	formula.setAttribute('size', '35');
+	formula.setAttribute('size', '40');
 	if (rows != 0) {
 		formula.setAttribute('value', 'x');
 	} else {
