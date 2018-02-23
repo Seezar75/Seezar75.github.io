@@ -28,6 +28,7 @@ let mousePosEnd;
 let maxRad = 30;
 
 let bounce = 0;
+let bounceOthers = 0;
 let avoidObstacles = 1;
 let follow = 0;
 let aligning = 0;
@@ -77,6 +78,32 @@ function loop() {
 	ctx.fillStyle = "black";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+	/* bounce with each other
+	if (bounceOthers == 1) {
+		for (let i = 0; i < serpentelli.length - 1; i++) {
+			for (let j = i + 1; j < serpentelli.length; j++) {
+				let relative = new Vector(serpentelli[i].x - serpentelli[j].x, serpentelli[i].y - serpentelli[j].y);
+				let dist = relative.getModule();
+				if (dist < serpentelli[i].size + serpentelli[j].size) {
+					relative.normalize();
+					let a1 = serpentelli[i].velVect.dot(relative);
+					let a2 = serpentelli[j].velVect.dot(relative);
+					let opt = 2*(a1-a2)/(serpentelli[i].size+serpentelli[j].size)
+					if (opt > 0) {
+						console.log("Boing!");
+						serpentelli[i].velVect.x += opt*serpentelli[j].size*relative.x;
+						serpentelli[i].velVect.y += opt*serpentelli[j].size*relative.y;
+						serpentelli[j].velVect.x -= opt*serpentelli[i].size*relative.x;
+						serpentelli[j].velVect.y -= opt*serpentelli[i].size*relative.y;
+						serpentelli[i].velVect.normalize();
+						serpentelli[j].velVect.normalize();
+					}
+				}
+			}
+		}
+	}
+	*/
+
 	for (let s of serpentelli) {
 
 		if (pause == 0) {
@@ -113,10 +140,11 @@ function loop() {
 
 	ctx.fillText("Noise = " + noise.toFixed(2), 10, 20);
 	ctx.fillText("Distance = " + serpentelli[0].idealDist, 10, 40);
-	if (bounce == 1) ctx.fillText("Bounce", 10, 60);
+	if (bounce == 1) ctx.fillText("Bounce on walls", 10, 60);
 	if (follow == 1) ctx.fillText("Follow", 10, 80);
 	if (aligning == 1) ctx.fillText("Aligning", 10, 100);
 	if (grouping == 1) ctx.fillText("Grouping", 10, 120);
+	if (bounceOthers == 1) ctx.fillText("Bounce with each other", 10, 140);
 
 	if (touchStatus == 1) {
 		ctx.beginPath();
@@ -182,6 +210,7 @@ function keyUpHandler(evt) {
 		// Toggle grouping
 		if (grouping == 0) {
 			grouping = 1;
+			bounceOthers = 0;
 		} else {
 			grouping = 0;
 		}
@@ -196,6 +225,7 @@ function keyUpHandler(evt) {
 			"N: change noise\n" +
 			"O: place an obstacle at mouse position\n" +
 			"P: pause animation\n" +
+			"R: toggle serpentelli bouncing with each other\n" +
 			"Numpad +: increase distance\n" +
 			"Numpad -: decrease distance\n\n" +
 			"Click and drag to create another serpentello\n" +
@@ -214,6 +244,14 @@ function keyUpHandler(evt) {
 			pause = 1;
 		} else {
 			pause = 0;
+		}
+	} else if (evt.keyCode == 82) { // R
+		// Serpentelli bouncing with each other
+		if (bounceOthers == 0) {
+			bounceOthers = 1;
+			grouping = 0;
+		} else {
+			bounceOthers = 0;
 		}
 	} else if (evt.keyCode == 107) { // NumPad +
 		// Increase distance

@@ -123,6 +123,26 @@ class Serpentello {
 			this.velVect.add(obstVect);
 		}
 
+		// Avoid others
+		if (bounceOthers == 1) {
+			let otherVect = new Vector(0, 0);
+			for (let s of serpentelli) {
+				if (this != s) {
+					let relative = new Vector(s.x - this.x, s.y - this.y);
+					let dist = relative.getModule();
+					if (dist < this.size + s.size) {
+						relative.normalize();
+						relative.neg();
+						relative.multiplyScalar(3500 * s.size / ((dist * dist * this.followRate) * (this.size + s.size)));
+						otherVect.add(relative);
+					}
+				} else {
+					//it's me
+				}
+			}
+			this.velVect.add(otherVect);
+		}
+
 		// Aligning and matching speeds
 		if (aligning == 1) {
 			let alignVect = new Vector(0, 0);
