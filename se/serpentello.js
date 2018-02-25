@@ -6,6 +6,7 @@ class Serpentello {
 		this.vel = startVel;
 		this.velVect = new Vector(Math.cos(startAngle), Math.sin(startAngle));
 		this.size = startSize;
+		this.targetSize = startSize;
 		this.tailLength = 70;
 		this.tail = [];
 		this.tail.push({
@@ -159,7 +160,7 @@ class Serpentello {
 			let dist = relative.getModule();
 			if (dist < this.size) {
 				food.splice(i, 1);
-				this.size = Math.sqrt(this.size * this.size + 80);
+				this.targetSize = Math.sqrt(this.targetSize * this.targetSize + 80);
 				break;
 			} else if (dist < 800) {
 				relative.normalize();
@@ -168,6 +169,10 @@ class Serpentello {
 			}
 		}
 		this.velVect.add(foodVect);
+		// Grow after eating food
+		if (Math.abs(this.targetSize - this.size) > 0.1) {
+			this.size += Math.sign(this.targetSize - this.size) * 0.1;
+		}
 
 
 		// Aligning and matching speeds
