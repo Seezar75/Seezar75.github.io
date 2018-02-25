@@ -45,6 +45,7 @@ rightPressed = leftPressed = upPressed = downPressed = false;
 let serpentelli = [];
 let obstacles = [];
 let walls = [];
+let food = [];
 
 let v;
 let v2;
@@ -133,6 +134,14 @@ function loop() {
 		ctx.closePath();
 	}
 
+	for (let f of food) {
+		ctx.beginPath();
+		ctx.arc(f.x, f.y, 10, 0, Math.PI * 2);
+		ctx.fillStyle = 'rgb(0, 240, 0)';
+		ctx.fill();
+		ctx.closePath();
+	}
+
 	if (mousePressed) {
 		ctx.beginPath();
 		rad = Math.sqrt((mousePosStart.x - mousePosEnd.x) * (mousePosStart.x - mousePosEnd.x) + (mousePosStart.y - mousePosEnd.y) * (mousePosStart.y - mousePosEnd.y));
@@ -171,7 +180,7 @@ function loop() {
 		ctx.beginPath();
 		ctx.strokeStyle = "rgba(255, 0, 0, 0.4)";
 		ctx.lineWidth = 5;
-		ctx.moveTo(wallStart.x,wallStart.y);
+		ctx.moveTo(wallStart.x, wallStart.y);
 		ctx.lineTo(mousePos.x, mousePos.y);
 		ctx.stroke();
 	}
@@ -217,6 +226,9 @@ function keyUpHandler(evt) {
 		// Clear obstacles and walls
 		obstacles = [];
 		walls = [];
+	} else if (evt.keyCode == 69) { // E
+		// Place food
+		food.push(mousePos);
 	} else if (evt.keyCode == 70) { // F
 		// Toggle follow mouse
 		if (follow == 0) {
@@ -238,6 +250,7 @@ function keyUpHandler(evt) {
 			"A: toggle alignment\n" +
 			"B: toggle wall bouncing\n" +
 			"C: clear obstacles\n" +
+			"E: place food at mouse position\n" +
 			"F: toggle follow mouse\n" +
 			"G: toggle grouping\n" +
 			"N: change noise\n" +
@@ -362,7 +375,7 @@ function touchStartHandler(evt) {
 	mousePos.x = Math.floor(evt.targetTouches[0].clientX);
 	mousePos.y = Math.floor(evt.targetTouches[0].clientY);
 	let curTouch = new Date().getTime();
-	if (curTouch - lastTouch < 400) {
+	if (curTouch - lastTouch < 230) {
 		if (touchStatus == 1 && obstacles.length > 1) {
 			obstacles.pop();
 		}

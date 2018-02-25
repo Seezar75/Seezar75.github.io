@@ -145,9 +145,30 @@ class Serpentello {
 
 		// Avoid walls
 		for (let w of walls) {
-			let f = w.getForceVector({x:this.x, y:this.y}, this.size);
+			let f = w.getForceVector({
+				x: this.x,
+				y: this.y
+			}, this.size);
 			this.velVect.add(f);
 		}
+
+		// Eat food
+		let foodVect = new Vector(0, 0);
+		for (let i = 0; i < food.length; i++) {
+			let relative = new Vector(food[i].x - this.x, food[i].y - this.y);
+			let dist = relative.getModule();
+			if (dist < this.size) {
+				food.splice(i, 1);
+				this.size = Math.sqrt(this.size * this.size + 80);
+				break;
+			} else if (dist < 800) {
+				relative.normalize();
+				relative.multiplyScalar(150 / (dist * this.followRate));
+				foodVect.add(relative);
+			}
+		}
+		this.velVect.add(foodVect);
+
 
 		// Aligning and matching speeds
 		if (aligning == 1) {
