@@ -146,10 +146,7 @@ class Serpentello {
 
 		// Avoid walls
 		for (let w of walls) {
-			let f = w.getForceVector({
-				x: this.x,
-				y: this.y
-			}, this.size);
+			let f = w.getForceVector(this);
 			this.velVect.add(f);
 		}
 
