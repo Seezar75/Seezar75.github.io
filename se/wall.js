@@ -35,7 +35,7 @@ class Wall {
 				v = new Vector(dx, dy);
 				v.normalize();
 				v.multiply(v90);
-				v.multiplyScalar(150 / (distLine + 5) / Math.abs(distLine + 5));
+				v.multiplyScalar(Math.sign(distLine) * 10 / Math.pow(Math.abs(distLine) - s.size + 2, 2));
 			}
 		} else {
 			if (distP1 < distP2) {
