@@ -46,6 +46,8 @@ let serpentelli = [];
 let obstacles = [];
 let walls = [];
 let food = [];
+let foodType = 0;
+const foodColors = ['rgb(0, 255, 0)', 'rgb(0, 90, 0)', 'rgb(255, 255, 0)', 'rgb(90, 90, 0)', 'rgb(255, 0, 255)', 'rgb(90, 0, 90)'];
 
 let v;
 let v2;
@@ -82,32 +84,6 @@ function loop() {
 	ctx.fillStyle = "black";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-	/* bounce with each other
-	if (bounceOthers == 1) {
-		for (let i = 0; i < serpentelli.length - 1; i++) {
-			for (let j = i + 1; j < serpentelli.length; j++) {
-				let relative = new Vector(serpentelli[i].x - serpentelli[j].x, serpentelli[i].y - serpentelli[j].y);
-				let dist = relative.getModule();
-				if (dist < serpentelli[i].size + serpentelli[j].size) {
-					relative.normalize();
-					let a1 = serpentelli[i].velVect.dot(relative);
-					let a2 = serpentelli[j].velVect.dot(relative);
-					let opt = 2*(a1-a2)/(serpentelli[i].size+serpentelli[j].size)
-					if (opt > 0) {
-						console.log("Boing!");
-						serpentelli[i].velVect.x += opt*serpentelli[j].size*relative.x;
-						serpentelli[i].velVect.y += opt*serpentelli[j].size*relative.y;
-						serpentelli[j].velVect.x -= opt*serpentelli[i].size*relative.x;
-						serpentelli[j].velVect.y -= opt*serpentelli[i].size*relative.y;
-						serpentelli[i].velVect.normalize();
-						serpentelli[j].velVect.normalize();
-					}
-				}
-			}
-		}
-	}
-	*/
-
 	for (let s of serpentelli) {
 
 		if (pause == 0) {
@@ -137,7 +113,7 @@ function loop() {
 	for (let f of food) {
 		ctx.beginPath();
 		ctx.arc(f.x, f.y, 10, 0, Math.PI * 2);
-		ctx.fillStyle = 'rgb(0, 240, 0)';
+		ctx.fillStyle = foodColors[f.t];
 		ctx.fill();
 		ctx.closePath();
 	}
@@ -161,6 +137,7 @@ function loop() {
 	if (aligning == 1) ctx.fillText("Aligning", 10, 100);
 	if (grouping == 1) ctx.fillText("Grouping", 10, 120);
 	if (bounceOthers == 1) ctx.fillText("Bounce with each other", 10, 140);
+	ctx.fillText("Food type: " + foodType, 10, 140);
 
 	if (touchStatus == 1) {
 		ctx.beginPath();
@@ -228,7 +205,11 @@ function keyUpHandler(evt) {
 		walls = [];
 	} else if (evt.keyCode == 69) { // E
 		// Place food
-		food.push(mousePos);
+		food.push({
+			x: mousePos.x,
+			y: mousePos.y,
+			t: foodType
+		});
 	} else if (evt.keyCode == 70) { // F
 		// Toggle follow mouse
 		if (follow == 0) {
@@ -257,6 +238,7 @@ function keyUpHandler(evt) {
 			"O: place an obstacle at mouse position\n" +
 			"P: pause animation\n" +
 			"R: toggle serpentelli bouncing with each other\n" +
+			"T: change food type\n" +
 			"W: draw walls, W to start, move mouse and then W again to end\n" +
 			"Numpad +: increase distance\n" +
 			"Numpad -: decrease distance\n\n" +
@@ -284,6 +266,12 @@ function keyUpHandler(evt) {
 			grouping = 0;
 		} else {
 			bounceOthers = 0;
+		}
+	} else if (evt.keyCode == 84) { // T
+		// Change type of food
+		foodType++;
+		if (foodType >= foodColors.length) {
+			foodType = 0;
 		}
 	} else if (evt.keyCode == 87) { // W
 		// Draw wall

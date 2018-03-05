@@ -155,9 +155,42 @@ class Serpentello {
 		for (let i = 0; i < food.length; i++) {
 			let relative = new Vector(food[i].x - this.x, food[i].y - this.y);
 			let dist = relative.getModule();
-			if (dist < this.size) {
+			if (dist < this.size + 3) {
+				switch (food[i].t) {
+					case 0: // Get bigger
+						if (this.targetSize < 50) {
+							this.targetSize = Math.sqrt(this.targetSize * this.targetSize + 80);
+						}
+						break;
+					case 1: // Get smaller
+						if (this.targetSize > 5) {
+							this.targetSize -= 2;
+						}
+						break;
+					case 2: // Get faster
+						if (this.vel < 20) {
+							this.vel += 0.5;
+						}
+						break;
+					case 3: // Get slower
+						if (this.vel > 0.6) {
+							this.vel -= 0.5;
+						}
+						break;
+					case 4: // Get longer
+						if (this.tailLength < 150) {
+							this.tailLength += 5;
+						}
+						break;
+					case 5: // Get shorter
+						if (this.tailLength > 10) {
+							this.tailLength -= 5;
+						}
+						break;
+					default:
+						//
+				}
 				food.splice(i, 1);
-				this.targetSize = Math.sqrt(this.targetSize * this.targetSize + 80);
 				break;
 			} else if (dist < 800) {
 				relative.normalize();
@@ -266,6 +299,9 @@ class Serpentello {
 			x: this.x,
 			y: this.y
 		});
+		if (this.tail.length > this.tailLength) {
+			this.tail.shift();
+		}
 		if (this.tail.length > this.tailLength) {
 			this.tail.shift();
 		}
