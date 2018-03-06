@@ -1,5 +1,6 @@
 window.onload = function() {
 	canvas = document.getElementById("myCanvas");
+	menu = document.getElementById("mainMenu");
 	canvas.width = window.innerWidth; // in pixels
 	canvas.height = window.innerHeight; // in pixels
 	ctx = canvas.getContext("2d");
@@ -16,11 +17,13 @@ window.onload = function() {
 	canvas.addEventListener('touchstart', touchStartHandler, false);
 	canvas.addEventListener('touchend', touchEndHandler, false);
 	canvas.addEventListener('touchcancel', touchCancelHandler, false);
+	canvas.addEventListener('contextmenu', contextHandler, false);
 	setInterval(loop, 20);
 	setup();
 }
 
 let canvas;
+let menu;
 let mousePos;
 let mousePressed = false;
 let mousePosStart;
@@ -48,6 +51,7 @@ let walls = [];
 let food = [];
 let foodType = 0;
 const foodColors = ['rgb(0, 255, 0)', 'rgb(0, 90, 0)', 'rgb(255, 255, 0)', 'rgb(90, 90, 0)', 'rgb(255, 0, 255)', 'rgb(90, 0, 90)'];
+const foodNames = ['Bigger', 'Smaller', 'Faster', 'Slower', 'Longer', 'Shorter'];
 
 let v;
 let v2;
@@ -137,7 +141,7 @@ function loop() {
 	if (aligning == 1) ctx.fillText("Aligning", 10, 100);
 	if (grouping == 1) ctx.fillText("Grouping", 10, 120);
 	if (bounceOthers == 1) ctx.fillText("Bounce with each other", 10, 140);
-	ctx.fillText("Food type: " + foodType, 10, 140);
+	ctx.fillText("Food type: " + foodNames[foodType], 10, 140);
 
 	if (touchStatus == 1) {
 		ctx.beginPath();
@@ -194,11 +198,7 @@ function keyUpHandler(evt) {
 		}
 	} else if (evt.keyCode == 66) { // B
 		// Toggle bouncing on walls
-		if (bounce == 0) {
-			bounce = 1;
-		} else {
-			bounce = 0;
-		}
+		toggleBounceBorder();
 	} else if (evt.keyCode == 67) { // C
 		// Clear obstacles and walls
 		obstacles = [];
@@ -212,11 +212,7 @@ function keyUpHandler(evt) {
 		});
 	} else if (evt.keyCode == 70) { // F
 		// Toggle follow mouse
-		if (follow == 0) {
-			follow = 1;
-		} else {
-			follow = 0;
-		}
+		toggleFollow();
 	} else if (evt.keyCode == 71) { // G
 		// Toggle grouping
 		if (grouping == 0) {
@@ -269,10 +265,7 @@ function keyUpHandler(evt) {
 		}
 	} else if (evt.keyCode == 84) { // T
 		// Change type of food
-		foodType++;
-		if (foodType >= foodColors.length) {
-			foodType = 0;
-		}
+		cycleFoodType();
 	} else if (evt.keyCode == 87) { // W
 		// Draw wall
 		if (wallStart == null) {
@@ -314,6 +307,7 @@ function mouseMoveHandler(evt) {
 
 function mouseDownHandler(evt) {
 	mousePos = getMousePos(canvas, evt);
+	menu.style.display = "none";
 	let ind;
 	let minDist = canvas.width + canvas.height;
 	for (let i = 0; i < serpentelli.length; i++) {
@@ -422,6 +416,89 @@ function touchEndHandler(evt) {
 function touchCancelHandler(evt) {
 	follow = 0;
 	mousePressed = false;
+}
+
+function contextHandler(evt) {
+	evt.preventDefault();
+	menu.style.display = "block";
+}
+
+function cycleFoodType() {
+	let s = document.getElementById("foodP");
+	foodType++;
+	if (foodType >= foodColors.length) {
+		foodType = 0;
+	}
+	s.innerHTML = foodNames[foodType];
+}
+
+function toggleFollow() {
+	let s = document.getElementById("followP");
+	if (follow == 0) {
+		follow = 1;
+		s.style.color = '#0B0';
+		s.innerHTML = "ON";
+	} else {
+		follow = 0;
+		s.style.color = '#F00';
+		s.innerHTML = "OFF";
+	}
+}
+
+function toggleBounceOthers() {
+	let s = document.getElementById("otherP");
+	if (bounceOthers == 0) {
+		bounceOthers = 1;
+		aligning = 0;
+		grouping = 0;
+		s.style.color = '#0B0';
+		s.innerHTML = "ON";
+	} else {
+		bounceOthers = 0;
+		s.style.color = '#F00';
+		s.innerHTML = "OFF";
+	}
+}
+
+function toggleFlocking() {
+	let s = document.getElementById("flockingP");
+	if (aligning == 0) {
+		aligning = 1;
+		grouping = 1;
+		bounceOthers = 0;
+		s.style.color = '#0B0';
+		s.innerHTML = "ON";
+	} else {
+		aligning = 0;
+		grouping = 0;
+		s.style.color = '#F00';
+		s.innerHTML = "OFF";
+	}
+}
+
+function toggleBounceBorder() {
+	let s = document.getElementById("borderP");
+	if (bounce == 0) {
+		bounce = 1;
+		s.style.color = '#0B0';
+		s.innerHTML = "ON";
+	} else {
+		bounce = 0;
+		s.style.color = '#F00';
+		s.innerHTML = "OFF";
+	}
+}
+
+function setNoise(value) {
+	noise = Number(value);
+}
+
+function setDistance(value) {
+	for (let s of serpentelli) {
+		s.detectionDist = Number(value) * 2;
+		s.idealDist = Number(value);
+		s.calcParams(s.intensity);
+	}
 }
 
 function getRandomColor() {
