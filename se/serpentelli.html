@@ -1,5 +1,6 @@
 <canvas id="myCanvas" width="1300" height="800"></canvas>
 <ul id="mainMenu">
+	<li onclick="cycleModes();">Change mode <span id="modeP">Serpentelli</span></li>
 	<li onclick="cycleFoodType();">Change food type <span id="foodP">Bigger</span></li>
 	<li onclick="toggleFollow();">Toggle follow <span class="tog" id="followP">OFF</span></li>
 	<li onclick="toggleBounceBorder();">Toggle bounce on borders <span class="tog" id="borderP">OFF</span></li>
@@ -13,6 +14,7 @@
 		Distance
 		<input type="range" value="70" min="20" max="120" step="5" oninput="setDistance(this.value);"/>
 	</li>
+	<li onclick="cls();">Clear obstacles and walls</li>
 </ul>
 <style>
 	html, body, div, canvas, ul {
@@ -22,8 +24,8 @@
 	ul {
 		list-style-type: none;
 		position: absolute;
-		top: 20px;
-		left: 200px;
+		top: 2px;
+		left: 41px;
 		z-index: 10;
 		display: none;
 		width: 300px;

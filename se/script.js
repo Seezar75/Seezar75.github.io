@@ -17,7 +17,7 @@ window.onload = function() {
 	canvas.addEventListener('touchstart', touchStartHandler, false);
 	canvas.addEventListener('touchend', touchEndHandler, false);
 	canvas.addEventListener('touchcancel', touchCancelHandler, false);
-	canvas.addEventListener('contextmenu', contextHandler, false);
+	//canvas.addEventListener('contextmenu', contextHandler, false);
 	setInterval(loop, 20);
 	setup();
 }
@@ -39,6 +39,8 @@ let aligning = 0;
 let grouping = 0;
 let noise = 0.1;
 let pause = 0;
+let showMenu = 0;
+let mode = 0;
 
 let touchStatus = 0;
 let lastTouch = new Date().getTime();
@@ -52,9 +54,7 @@ let food = [];
 let foodType = 0;
 const foodColors = ['rgb(0, 255, 0)', 'rgb(0, 90, 0)', 'rgb(255, 255, 0)', 'rgb(90, 90, 0)', 'rgb(255, 0, 255)', 'rgb(90, 0, 90)'];
 const foodNames = ['Bigger', 'Smaller', 'Faster', 'Slower', 'Longer', 'Shorter'];
-
-let v;
-let v2;
+const modeNames = ['Serpentelli', 'Food', 'Walls', 'Obstacles'];
 
 function setup() {
 
@@ -134,14 +134,14 @@ function loop() {
 
 	ctx.fillStyle = "grey";
 
-	ctx.fillText("Noise = " + noise.toFixed(2), 10, 20);
-	ctx.fillText("Distance = " + serpentelli[0].idealDist, 10, 40);
-	if (bounce == 1) ctx.fillText("Bounce on walls", 10, 60);
-	if (follow == 1) ctx.fillText("Follow", 10, 80);
-	if (aligning == 1) ctx.fillText("Aligning", 10, 100);
-	if (grouping == 1) ctx.fillText("Grouping", 10, 120);
-	if (bounceOthers == 1) ctx.fillText("Bounce with each other", 10, 140);
-	ctx.fillText("Food type: " + foodNames[foodType], 10, 140);
+	//ctx.fillText("Noise = " + noise.toFixed(2), 10, 20);
+	//ctx.fillText("Distance = " + serpentelli[0].idealDist, 10, 40);
+	//if (bounce == 1) ctx.fillText("Bounce on walls", 10, 60);
+	//if (follow == 1) ctx.fillText("Follow", 10, 80);
+	//if (aligning == 1) ctx.fillText("Aligning", 10, 100);
+	//if (grouping == 1) ctx.fillText("Grouping", 10, 120);
+	//if (bounceOthers == 1) ctx.fillText("Bounce with each other", 10, 140);
+	//ctx.fillText("Food type: " + foodNames[foodType], 10, 140);
 
 	if (touchStatus == 1) {
 		ctx.beginPath();
@@ -165,6 +165,27 @@ function loop() {
 		ctx.lineTo(mousePos.x, mousePos.y);
 		ctx.stroke();
 	}
+
+	ctx.beginPath();
+	ctx.lineWidth = "2";
+	ctx.strokeStyle = "rgba(200,200,200,0.4)";
+	ctx.rect(2, 2, 38, 38);
+	ctx.stroke();
+
+	ctx.beginPath();
+	ctx.lineWidth = "4";
+	ctx.moveTo(10, 12);
+	ctx.lineTo(32, 12);
+	ctx.stroke();
+	ctx.beginPath();
+	ctx.moveTo(10, 21);
+	ctx.lineTo(32, 21);
+	ctx.stroke();
+	ctx.beginPath();
+	ctx.moveTo(10, 30);
+	ctx.lineTo(32, 30);
+	ctx.stroke();
+
 
 }
 
@@ -307,41 +328,76 @@ function mouseMoveHandler(evt) {
 
 function mouseDownHandler(evt) {
 	mousePos = getMousePos(canvas, evt);
-	menu.style.display = "none";
-	let ind;
-	let minDist = canvas.width + canvas.height;
-	for (let i = 0; i < serpentelli.length; i++) {
-		let dist = serpentelli[i].getDist(mousePos.x, mousePos.y);
-		if (dist < serpentelli[i].size && dist < minDist) {
-			ind = i;
-			minDist = dist;
-		}
+	if (mousePos.x < 30 && mousePos.y < 30) {
+		toggleMenu();
+		return;
 	}
-
-	if (minDist < canvas.width + canvas.height) {
-		serpentelli.splice(ind, 1);
-	} else {
-		mousePosStart = mousePos;
-		mousePosEnd = mousePos;
-		if (evt.button == 0) {
-			mousePressed = true;
+	if (mode == 0) {
+		// Serpentelli
+		let ind;
+		let minDist = canvas.width + canvas.height;
+		for (let i = 0; i < serpentelli.length; i++) {
+			let dist = serpentelli[i].getDist(mousePos.x, mousePos.y);
+			if (dist < serpentelli[i].size && dist < minDist) {
+				ind = i;
+				minDist = dist;
+			}
 		}
+
+		if (minDist < canvas.width + canvas.height) {
+			serpentelli.splice(ind, 1);
+		} else {
+			mousePosStart = mousePos;
+			mousePosEnd = mousePos;
+			if (evt.button == 0) {
+				mousePressed = true;
+			}
+		}
+	} else if (mode == 1) {
+		// Food
+		food.push({
+			x: mousePos.x,
+			y: mousePos.y,
+			t: foodType
+		});
+	} else if (mode == 2) {
+		// Walls
+		if (evt.button == 0) {
+			wallStart = {
+				x: mousePos.x,
+				y: mousePos.y
+			}
+		}
+	} else if (mode == 3) {
+		// Obstacles
+		obstacles.push(mousePos);
 	}
 
 }
 
 function mouseUpHandler(evt) {
 	mousePos = getMousePos(canvas, evt);
-	if (mousePressed) {
-		rad = Math.sqrt((mousePosStart.x - mousePosEnd.x) * (mousePosStart.x - mousePosEnd.x) + (mousePosStart.y - mousePosEnd.y) * (mousePosStart.y - mousePosEnd.y));
-		if (rad > maxRad) rad = maxRad;
-		if (rad > 2) {
-			serpentelli.push(new Serpentello(mousePosStart.x, mousePosStart.y, 0.5 + Math.random() * 6, Math.random() * Math.PI * 2, rad));
-			serpentelli.sort((a, b) => b.size - a.size);
+	if (mode == 0) {
+		if (mousePressed) {
+			rad = Math.sqrt((mousePosStart.x - mousePosEnd.x) * (mousePosStart.x - mousePosEnd.x) + (mousePosStart.y - mousePosEnd.y) * (mousePosStart.y - mousePosEnd.y));
+			if (rad > maxRad) rad = maxRad;
+			if (rad > 2) {
+				serpentelli.push(new Serpentello(mousePosStart.x, mousePosStart.y, 0.5 + Math.random() * 6, Math.random() * Math.PI * 2, rad));
+				serpentelli.sort((a, b) => b.size - a.size);
+			}
 		}
-	}
-	if (evt.button == 0) {
-		mousePressed = false;
+		if (evt.button == 0) {
+			mousePressed = false;
+		}
+	} else if (mode == 2 && wallStart != null) {
+		// Walls
+		if (evt.button == 0) {
+			walls.push(new Wall(wallStart, {
+				x: mousePos.x,
+				y: mousePos.y
+			}));
+			wallStart = null;
+		}
 	}
 }
 
@@ -413,6 +469,16 @@ function touchEndHandler(evt) {
 	mousePressed = false;
 }
 
+function toggleMenu() {
+	if (showMenu == 0) {
+		showMenu = 1;
+		menu.style.display = "block";
+	} else {
+		showMenu = 0;
+		menu.style.display = "none";
+	}
+}
+
 function touchCancelHandler(evt) {
 	follow = 0;
 	mousePressed = false;
@@ -432,6 +498,15 @@ function cycleFoodType() {
 	s.innerHTML = foodNames[foodType];
 }
 
+function cycleModes() {
+	let s = document.getElementById("modeP");
+	mode++;
+	if (mode >= modeNames.length) {
+		mode = 0;
+	}
+	s.innerHTML = modeNames[mode];
+}
+
 function toggleFollow() {
 	let s = document.getElementById("followP");
 	if (follow == 0) {
@@ -449,10 +524,9 @@ function toggleBounceOthers() {
 	let s = document.getElementById("otherP");
 	if (bounceOthers == 0) {
 		bounceOthers = 1;
-		aligning = 0;
-		grouping = 0;
 		s.style.color = '#0B0';
 		s.innerHTML = "ON";
+		if (aligning == 1) toggleFlocking();
 	} else {
 		bounceOthers = 0;
 		s.style.color = '#F00';
@@ -465,9 +539,9 @@ function toggleFlocking() {
 	if (aligning == 0) {
 		aligning = 1;
 		grouping = 1;
-		bounceOthers = 0;
 		s.style.color = '#0B0';
 		s.innerHTML = "ON";
+		if (bounceOthers == 1) toggleBounceOthers();
 	} else {
 		aligning = 0;
 		grouping = 0;
@@ -499,6 +573,11 @@ function setDistance(value) {
 		s.idealDist = Number(value);
 		s.calcParams(s.intensity);
 	}
+}
+
+function cls() {
+	obstacles = [];
+	walls = [];
 }
 
 function getRandomColor() {
