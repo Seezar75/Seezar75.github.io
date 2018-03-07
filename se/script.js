@@ -1,8 +1,8 @@
 window.onload = function() {
 	canvas = document.getElementById("myCanvas");
 	menu = document.getElementById("mainMenu");
-	canvas.width = window.innerWidth; // in pixels
-	canvas.height = window.innerHeight; // in pixels
+	canvas.width = window.innerWidth;
+	canvas.height = window.innerHeight;
 	ctx = canvas.getContext("2d");
 	mousePos = {
 		x: canvas.width / 2,
@@ -17,7 +17,6 @@ window.onload = function() {
 	canvas.addEventListener('touchstart', touchStartHandler, false);
 	canvas.addEventListener('touchend', touchEndHandler, false);
 	canvas.addEventListener('touchcancel', touchCancelHandler, false);
-	//canvas.addEventListener('contextmenu', contextHandler, false);
 	setInterval(loop, 20);
 	setup();
 }
@@ -132,8 +131,7 @@ function loop() {
 		ctx.closePath();
 	}
 
-	ctx.fillStyle = "grey";
-
+	//ctx.fillStyle = "grey";
 	//ctx.fillText("Noise = " + noise.toFixed(2), 10, 20);
 	//ctx.fillText("Distance = " + serpentelli[0].idealDist, 10, 40);
 	//if (bounce == 1) ctx.fillText("Bounce on walls", 10, 60);
@@ -166,6 +164,7 @@ function loop() {
 		ctx.stroke();
 	}
 
+	// Draw menu icon top left
 	ctx.beginPath();
 	ctx.lineWidth = "2";
 	ctx.strokeStyle = "rgba(200,200,200,0.4)";
@@ -212,18 +211,13 @@ function keyUpHandler(evt) {
 		downPressed = false;
 	} else if (evt.keyCode == 65) { // A
 		// Toggle aligning
-		if (aligning == 0) {
-			aligning = 1;
-		} else {
-			aligning = 0;
-		}
+		toggleFlocking();
 	} else if (evt.keyCode == 66) { // B
 		// Toggle bouncing on walls
 		toggleBounceBorder();
 	} else if (evt.keyCode == 67) { // C
 		// Clear obstacles and walls
-		obstacles = [];
-		walls = [];
+		cls();
 	} else if (evt.keyCode == 69) { // E
 		// Place food
 		food.push({
@@ -234,14 +228,6 @@ function keyUpHandler(evt) {
 	} else if (evt.keyCode == 70) { // F
 		// Toggle follow mouse
 		toggleFollow();
-	} else if (evt.keyCode == 71) { // G
-		// Toggle grouping
-		if (grouping == 0) {
-			grouping = 1;
-			bounceOthers = 0;
-		} else {
-			grouping = 0;
-		}
 	} else if (evt.keyCode == 72) { // H
 		// Help
 		let helpString = "Press:\n" +
@@ -250,7 +236,6 @@ function keyUpHandler(evt) {
 			"C: clear obstacles\n" +
 			"E: place food at mouse position\n" +
 			"F: toggle follow mouse\n" +
-			"G: toggle grouping\n" +
 			"N: change noise\n" +
 			"O: place an obstacle at mouse position\n" +
 			"P: pause animation\n" +
@@ -278,12 +263,7 @@ function keyUpHandler(evt) {
 		}
 	} else if (evt.keyCode == 82) { // R
 		// Serpentelli bouncing with each other
-		if (bounceOthers == 0) {
-			bounceOthers = 1;
-			grouping = 0;
-		} else {
-			bounceOthers = 0;
-		}
+		toggleBounceOthers();
 	} else if (evt.keyCode == 84) { // T
 		// Change type of food
 		cycleFoodType();
@@ -328,7 +308,7 @@ function mouseMoveHandler(evt) {
 
 function mouseDownHandler(evt) {
 	mousePos = getMousePos(canvas, evt);
-	if (mousePos.x < 30 && mousePos.y < 30) {
+	if (mousePos.x < 40 && mousePos.y < 40) {
 		toggleMenu();
 		return;
 	}
@@ -343,7 +323,6 @@ function mouseDownHandler(evt) {
 				minDist = dist;
 			}
 		}
-
 		if (minDist < canvas.width + canvas.height) {
 			serpentelli.splice(ind, 1);
 		} else {
@@ -392,10 +371,12 @@ function mouseUpHandler(evt) {
 	} else if (mode == 2 && wallStart != null) {
 		// Walls
 		if (evt.button == 0) {
-			walls.push(new Wall(wallStart, {
-				x: mousePos.x,
-				y: mousePos.y
-			}));
+			if (wallStart.x != mousePos.x || wallStart.y != mousePos.y) {
+				walls.push(new Wall(wallStart, {
+					x: mousePos.x,
+					y: mousePos.y
+				}));
+			}
 			wallStart = null;
 		}
 	}
