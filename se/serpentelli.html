@@ -1,8 +1,51 @@
 <canvas id="myCanvas" width="1300" height="800"></canvas>
+<ul id="mainMenu">
+	<li onclick="cycleModes();">Change mode <span id="modeP">Serpentelli</span></li>
+	<li onclick="cycleFoodType();">Change food type <span id="foodP">Bigger</span></li>
+	<li onclick="toggleFollow();">Toggle follow <span class="tog" id="followP">OFF</span></li>
+	<li onclick="toggleBounceBorder();">Toggle bounce on borders <span class="tog" id="borderP">OFF</span></li>
+	<li onclick="toggleBounceOthers();">Toggle bounce with others <span class="tog" id="otherP">OFF</span></li>
+	<li onclick="toggleFlocking();">Toggle flocking <span class="tog" id="flockingP">OFF</span></li>
+	<li>
+		Noise
+		<input type="range" value="0.1" min="0" max="0.6" step="0.05" oninput="setNoise(this.value);"/>
+	</li>
+	<li>
+		Distance
+		<input type="range" value="70" min="20" max="120" step="5" oninput="setDistance(this.value);"/>
+	</li>
+	<li onclick="cls();">Clear obstacles and walls</li>
+</ul>
 <style>
-	html, body, div, canvas {
+	html, body, div, canvas, ul {
 		margin: 0;
 		padding: 0;
+	}
+	ul {
+		list-style-type: none;
+		position: absolute;
+		top: 2px;
+		left: 41px;
+		z-index: 10;
+		display: none;
+		width: 300px;
+		background-color: #f1f1f1;
+		font-family: Arial, Helvetica, sans-serif;
+	}
+	li {
+		color: #111;
+		padding: 5px 5px;
+	}
+	li:hover {
+		color: white;
+		background-color: #555;
+	}
+	span {
+		float: right;
+		font-weight: bold;
+	}
+	span.tog {
+		color: #F00;
 	}
 </style>
 <script type="text/javascript" src="vector.js"></script>
