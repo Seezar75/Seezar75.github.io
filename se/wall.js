@@ -40,8 +40,18 @@ class Wall {
 		} else {
 			if (distP1 < distP2) {
 				// P1
+				if (distP1 < s.size + 5) {
+					v = new Vector(s.x - this.p1.x, s.y - this.p1.y);
+					v.normalize();
+					v.multiplyScalar(10 / Math.pow(distP1 - s.size + 2, 2));
+				}
 			} else {
 				// P2
+				if (distP2 < s.size + 5) {
+					v = new Vector(s.x - this.p2.x, s.y - this.p2.y);
+					v.normalize();
+					v.multiplyScalar(10 / Math.pow(distP2 - s.size + 2, 2));
+				}
 			}
 		}
 		return v;
