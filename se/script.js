@@ -40,6 +40,7 @@ let noise = 0.1;
 let pause = 0;
 let showMenu = 0;
 let mode = 0;
+let preventMouseTouch = 0;
 
 let touchStatus = 0;
 let lastTouch = new Date().getTime();
@@ -310,6 +311,7 @@ function mouseDownHandler(evt) {
 	mousePos = getMousePos(canvas, evt);
 	if (mousePos.x < 40 && mousePos.y < 40) {
 		toggleMenu();
+		preventMouseTouch = 0;
 		return;
 	}
 	if (mode == 0) {
@@ -351,7 +353,6 @@ function mouseDownHandler(evt) {
 		// Obstacles
 		obstacles.push(mousePos);
 	}
-
 }
 
 function mouseUpHandler(evt) {
@@ -393,25 +394,12 @@ function getMousePos(canvas, evt) {
 function touchStartHandler(evt) {
 	mousePos.x = Math.floor(evt.targetTouches[0].clientX);
 	mousePos.y = Math.floor(evt.targetTouches[0].clientY);
-	let curTouch = new Date().getTime();
-	if (curTouch - lastTouch < 230) {
-		if (touchStatus == 1 && obstacles.length > 1) {
-			obstacles.pop();
-		}
-		touchStatus++;
-		if (touchStatus > 2) {
-			touchStatus = 0;
-		}
+	if (mousePos.x < 40 && mousePos.y < 40) {
+		toggleMenu();
+		preventMouseTouch = 1;
+		return;
 	}
-	lastTouch = curTouch;
-	if (touchStatus == 0) {
-		follow = 1;
-	} else if (touchStatus == 1) {
-		obstacles.push({
-			x: mousePos.x,
-			y: mousePos.y
-		});
-	} else {
+	if (mode == 0) {
 		mousePressed = true;
 		mousePosStart = {
 			x: mousePos.x,
@@ -421,6 +409,24 @@ function touchStartHandler(evt) {
 			x: mousePos.x,
 			y: mousePos.y
 		};
+	} else if (mode == 1) {
+		// Food
+		food.push({
+			x: mousePos.x,
+			y: mousePos.y,
+			t: foodType
+		});
+	} else if (mode == 2) {
+		// Walls
+		wallStart = {
+			x: mousePos.x,
+			y: mousePos.y
+		}
+	} else if (mode == 3) {
+		obstacles.push({
+			x: mousePos.x,
+			y: mousePos.y
+		});
 	}
 
 	evt.preventDefault();
@@ -429,28 +435,39 @@ function touchStartHandler(evt) {
 function touchMoveHandler(evt) {
 	mousePos.x = Math.floor(evt.targetTouches[0].clientX);
 	mousePos.y = Math.floor(evt.targetTouches[0].clientY);
-	if (touchStatus == 2) {
+	if (mode == 0) {
 		mousePosEnd = {
-			x: mousePosStart.x + ((mousePos.x - mousePosStart.x) / 6),
-			y: mousePosStart.y + ((mousePos.y - mousePosStart.y) / 6)
+			x: mousePosStart.x + ((mousePos.x - mousePosStart.x) / 4),
+			y: mousePosStart.y + ((mousePos.y - mousePosStart.y) / 4)
 		};
 	}
 }
 
 function touchEndHandler(evt) {
-	follow = 0;
-	if (mousePressed) {
-		rad = Math.sqrt((mousePosStart.x - mousePosEnd.x) * (mousePosStart.x - mousePosEnd.x) + (mousePosStart.y - mousePosEnd.y) * (mousePosStart.y - mousePosEnd.y));
-		if (rad > maxRad) rad = maxRad;
-		if (rad > 2) {
-			serpentelli.push(new Serpentello(mousePosStart.x, mousePosStart.y, 0.5 + Math.random() * 6, Math.random() * Math.PI * 2, rad));
-			serpentelli.sort((a, b) => b.size - a.size);
+	if (mode == 0) {
+		if (mousePressed) {
+			rad = Math.sqrt((mousePosStart.x - mousePosEnd.x) * (mousePosStart.x - mousePosEnd.x) + (mousePosStart.y - mousePosEnd.y) * (mousePosStart.y - mousePosEnd.y));
+			if (rad > maxRad) rad = maxRad;
+			if (rad > 2) {
+				serpentelli.push(new Serpentello(mousePosStart.x, mousePosStart.y, 0.5 + Math.random() * 6, Math.random() * Math.PI * 2, rad));
+				serpentelli.sort((a, b) => b.size - a.size);
+			}
 		}
+		mousePressed = false;
+	} else if (mode == 2 && wallStart != null) {
+		// Walls
+		if (wallStart.x != mousePos.x || wallStart.y != mousePos.y) {
+			walls.push(new Wall(wallStart, {
+				x: mousePos.x,
+				y: mousePos.y
+			}));
+		}
+		wallStart = null;
 	}
-	mousePressed = false;
 }
 
 function toggleMenu() {
+	if (preventMouseTouch == 1) return;
 	if (showMenu == 0) {
 		showMenu = 1;
 		menu.style.display = "block";
