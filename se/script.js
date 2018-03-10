@@ -41,6 +41,7 @@ let pause = 0;
 let showMenu = 0;
 let mode = 0;
 let preventMouseTouch = 0;
+let idSelected = -1;
 
 let touchStatus = 0;
 let lastTouch = new Date().getTime();
@@ -54,7 +55,7 @@ let food = [];
 let foodType = 0;
 const foodColors = ['rgb(0, 255, 0)', 'rgb(0, 90, 0)', 'rgb(255, 255, 0)', 'rgb(90, 90, 0)', 'rgb(255, 0, 255)', 'rgb(90, 0, 90)'];
 const foodNames = ['Bigger', 'Smaller', 'Faster', 'Slower', 'Longer', 'Shorter'];
-const modeNames = ['Serpentelli', 'Food', 'Walls', 'Obstacles'];
+const modeNames = ['Serpentelli', 'Food', 'Walls', 'Obstacles', 'Change color'];
 
 function setup() {
 
@@ -257,11 +258,7 @@ function keyUpHandler(evt) {
 		obstacles.push(mousePos);
 	} else if (evt.keyCode == 80) { // P
 		// Pause
-		if (pause == 0) {
-			pause = 1;
-		} else {
-			pause = 0;
-		}
+		togglePause();
 	} else if (evt.keyCode == 82) { // R
 		// Serpentelli bouncing with each other
 		toggleBounceOthers();
@@ -352,6 +349,25 @@ function mouseDownHandler(evt) {
 	} else if (mode == 3) {
 		// Obstacles
 		obstacles.push(mousePos);
+	} else if (mode == 4) {
+		// Color
+		let ind;
+		let minDist = canvas.width + canvas.height;
+		for (let i = 0; i < serpentelli.length; i++) {
+			let dist = serpentelli[i].getDist(mousePos.x, mousePos.y);
+			if (dist < serpentelli[i].size && dist < minDist) {
+				ind = i;
+				minDist = dist;
+			}
+		}
+		if (minDist < canvas.width + canvas.height) {
+			idSelected = ind;
+			let s = document.getElementById("colPick");
+			s.value = serpentelli[ind].color;
+			s.click();
+		} else {
+			idSelected = -1;
+		}
 	}
 }
 
@@ -400,11 +416,24 @@ function touchStartHandler(evt) {
 		return;
 	}
 	if (mode == 0) {
-		mousePressed = true;
-		mousePosStart = {
-			x: mousePos.x,
-			y: mousePos.y
-		};
+		let ind;
+		let minDist = canvas.width + canvas.height;
+		for (let i = 0; i < serpentelli.length; i++) {
+			let dist = serpentelli[i].getDist(mousePos.x, mousePos.y);
+			if (dist < serpentelli[i].size && dist < minDist) {
+				ind = i;
+				minDist = dist;
+			}
+		}
+		if (minDist < canvas.width + canvas.height) {
+			serpentelli.splice(ind, 1);
+		} else {
+			mousePressed = true;
+			mousePosStart = {
+				x: mousePos.x,
+				y: mousePos.y
+			};
+		}
 		mousePosEnd = {
 			x: mousePos.x,
 			y: mousePos.y
@@ -423,10 +452,30 @@ function touchStartHandler(evt) {
 			y: mousePos.y
 		}
 	} else if (mode == 3) {
+		// Obstacles
 		obstacles.push({
 			x: mousePos.x,
 			y: mousePos.y
 		});
+	} else if (mode == 4) {
+		// Color
+		let ind;
+		let minDist = canvas.width + canvas.height;
+		for (let i = 0; i < serpentelli.length; i++) {
+			let dist = serpentelli[i].getDist(mousePos.x, mousePos.y);
+			if (dist < serpentelli[i].size && dist < minDist) {
+				ind = i;
+				minDist = dist;
+			}
+		}
+		if (minDist < canvas.width + canvas.height) {
+			idSelected = ind;
+			let s = document.getElementById("colPick");
+			s.value = serpentelli[ind].color;
+			s.click();
+		} else {
+			idSelected = -1;
+		}
 	}
 
 	evt.preventDefault();
@@ -548,6 +597,19 @@ function toggleFlocking() {
 	}
 }
 
+function togglePause() {
+	let s = document.getElementById("pauseP");
+	if (pause == 0) {
+		pause = 1;
+		s.style.color = '#0B0';
+		s.innerHTML = "ON";
+	} else {
+		pause = 0;
+		s.style.color = '#F00';
+		s.innerHTML = "OFF";
+	}
+}
+
 function toggleBounceBorder() {
 	let s = document.getElementById("borderP");
 	if (bounce == 0) {
@@ -570,6 +632,12 @@ function setDistance(value) {
 		s.detectionDist = Number(value) * 2;
 		s.idealDist = Number(value);
 		s.calcParams(s.intensity);
+	}
+}
+
+function onColorChange(col) {
+	if (idSelected != -1) {
+		serpentelli[idSelected].color = col.value;
 	}
 }
 
