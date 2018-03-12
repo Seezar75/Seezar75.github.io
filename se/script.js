@@ -29,6 +29,7 @@ let mousePosStart;
 let mousePosEnd;
 let maxRad = 30;
 let wallStart = null;
+let cp;
 
 let bounce = 0;
 let bounceOthers = 0;
@@ -61,6 +62,8 @@ function setup() {
 
 	ctx.font = "12px Comic Sans MS";
 	ctx.lineCap = "round";
+
+	cp = new colPick(document.getElementById("colPick1"), onColorSelected);
 
 	for (let i = 0; i < 10; i++) {
 		serpentelli.push(new Serpentello(getRandomInt(0, canvas.width), getRandomInt(0, canvas.height), 0.5 + Math.random() * 6, Math.random() * Math.PI * 2, getRandomInt(5, maxRad)));
@@ -362,9 +365,8 @@ function mouseDownHandler(evt) {
 		}
 		if (minDist < canvas.width + canvas.height) {
 			idSelected = ind;
-			let s = document.getElementById("colPick");
-			s.value = serpentelli[ind].color;
-			s.click();
+			cp.setColorHex(serpentelli[ind].color);
+			cp.show();
 		} else {
 			idSelected = -1;
 		}
@@ -470,9 +472,8 @@ function touchStartHandler(evt) {
 		}
 		if (minDist < canvas.width + canvas.height) {
 			idSelected = ind;
-			let s = document.getElementById("colPick");
-			s.value = serpentelli[ind].color;
-			s.click();
+			cp.setColorHex(serpentelli[ind].color);
+			cp.show();
 		} else {
 			idSelected = -1;
 		}
@@ -635,12 +636,6 @@ function setDistance(value) {
 	}
 }
 
-function onColorChange(col) {
-	if (idSelected != -1) {
-		serpentelli[idSelected].color = col.value;
-	}
-}
-
 function cls() {
 	obstacles = [];
 	walls = [];
@@ -657,4 +652,10 @@ function getRandomColor() {
 
 function getRandomInt(min, max) {
 	return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function onColorSelected(hexColor) {
+	if (idSelected != -1) {
+		serpentelli[idSelected].color = hexColor;
+	};
 }
