@@ -9,6 +9,7 @@ class colPick {
 		}
 
 		this.l = 0.5;
+		this.mousePressed = false;
 		this.callback = callback;
 
 		this.mainCanvas = document.createElement('canvas');
@@ -22,7 +23,10 @@ class colPick {
 		this.mainDiv.appendChild(this.mainCanvas);
 		this.mainCtx.fillStyle = "black";
 		this.mainCtx.fillRect(0, 0, this.mainCanvas.width, this.mainCanvas.height);
-		this.mainCanvas.addEventListener('mousedown', this.clickMain, false);
+		this.mainCanvas.addEventListener('mousedown', this.downMain, false);
+		this.mainCanvas.addEventListener('mouseup', this.upMain, false);
+		this.mainCanvas.addEventListener('mousemove', this.moveMain, false);
+		this.mainCanvas.addEventListener('mouseout', this.outMain, false);
 		this.mainCanvas.addEventListener('touchstart', this.touchMain, false);
 		this.mainCanvas.parent = this;
 		this.fillMain(this.mainCanvas);
@@ -42,7 +46,10 @@ class colPick {
 		this.mainDiv.appendChild(this.lightCanvas);
 		this.lightCtx.fillStyle = "black";
 		this.lightCtx.fillRect(0, 0, this.lightCanvas.width, this.lightCanvas.height);
-		this.lightCanvas.addEventListener('mousedown', this.clickLight, false);
+		this.lightCanvas.addEventListener('mousedown', this.downLight, false);
+		this.lightCanvas.addEventListener('mouseup', this.upLight, false);
+		this.lightCanvas.addEventListener('mousemove', this.moveLight, false);
+		this.lightCanvas.addEventListener('mouseout', this.outLight, false);
 		this.mainCanvas.addEventListener('touchstart', this.touchLight, false);
 		this.lightCanvas.parent = this;
 		this.fillLight(this.lightCanvas);
@@ -91,19 +98,45 @@ class colPick {
 		};
 	}
 
-	clickMain(evt) {
+	downMain(evt) {
 		// "this" is the Canvas
+		if (evt.button == 0) {
+			this.mousePressed = true;
+		}
 		let mp = this.parent.getMousePos(this, evt);
 		this.mp = mp;
-		// console.log("Mouse Pressed at " + mp.x + ", " + mp.y);
 		let rgb = colPick.hslToRgb(mp.x / this.width, 1 - (mp.y / this.height), this.parent.l);
 		this.parent.rgb = rgb;
 		this.parent.fillLight(this.parent.lightCanvas);
 		this.parent.showcol.style.backgroundColor = this.parent.hexValue();
 	}
 
-	clickLight(evt) {
+	moveMain(evt) {
+		if (this.mousePressed) {
+			let mp = this.parent.getMousePos(this, evt);
+			this.mp = mp;
+			let rgb = colPick.hslToRgb(mp.x / this.width, 1 - (mp.y / this.height), this.parent.l);
+			this.parent.rgb = rgb;
+			this.parent.fillLight(this.parent.lightCanvas);
+			this.parent.showcol.style.backgroundColor = this.parent.hexValue();
+		}
+	}
+
+	upMain(evt) {
+		if (evt.button == 0) {
+			this.mousePressed = false;
+		}
+	}
+
+	outMain(evt) {
+		this.mousePressed = false;
+	}
+
+	downLight(evt) {
 		// "this" is the Canvas
+		if (evt.button == 0) {
+			this.mousePressed = true;
+		}
 		let mp = this.parent.getMousePos(this, evt);
 		let mpMain = this.parent.mainCanvas.mp;
 		let l = mp.y / this.height;
@@ -111,6 +144,29 @@ class colPick {
 		let rgb = colPick.hslToRgb(mpMain.x / this.parent.mainCanvas.width, 1 - (mpMain.y / this.parent.mainCanvas.height), l);
 		this.parent.rgb = rgb;
 		this.parent.showcol.style.backgroundColor = this.parent.hexValue();
+	}
+
+	moveLight(evt) {
+		if (this.mousePressed) {
+			let mp = this.parent.getMousePos(this, evt);
+			let mpMain = this.parent.mainCanvas.mp;
+			let l = mp.y / this.height;
+			this.parent.l = l;
+			console.log(l);
+			let rgb = colPick.hslToRgb(mpMain.x / this.parent.mainCanvas.width, 1 - (mpMain.y / this.parent.mainCanvas.height), l);
+			this.parent.rgb = rgb;
+			this.parent.showcol.style.backgroundColor = this.parent.hexValue();
+		}
+	}
+
+	upLight(evt) {
+		if (evt.button == 0) {
+			this.mousePressed = false;
+		}
+	}
+
+	outLight(evt) {
+		this.mousePressed = false;
 	}
 
 	touchMain(evt) {
