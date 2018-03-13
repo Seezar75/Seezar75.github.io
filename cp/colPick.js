@@ -2,6 +2,13 @@ class colPick {
 	constructor(div, callback) {
 		this.mainDiv = div;
 
+		div.style.minWidth = "376px";
+		div.style.minHeight = "300px";
+		//let dispStyle = div.style.display;
+		//div.style.display = "block";
+		//console.log(div.getBoundingClientRect());
+		//div.style.display = dispStyle;
+		//window.addEventListener('resize', () => {console.log("Resize");});
 		this.rgb = {
 			r: 255,
 			g: 0,
@@ -28,6 +35,7 @@ class colPick {
 		this.mainCanvas.addEventListener('mousemove', this.moveMain, false);
 		this.mainCanvas.addEventListener('mouseout', this.outMain, false);
 		this.mainCanvas.addEventListener('touchstart', this.touchMain, false);
+		this.mainCanvas.addEventListener('touchmove', this.touchMain, false);
 		this.mainCanvas.parent = this;
 		this.fillMain(this.mainCanvas);
 		this.mainCanvas.mp = {
@@ -42,7 +50,7 @@ class colPick {
 		this.lightCanvas.style.display = "block";
 		this.lightCanvas.style.position = "absolute";
 		this.lightCanvas.style.top = "10px";
-		this.lightCanvas.style.left = "270px";
+		this.lightCanvas.style.left = "275px";
 		this.mainDiv.appendChild(this.lightCanvas);
 		this.lightCtx.fillStyle = "black";
 		this.lightCtx.fillRect(0, 0, this.lightCanvas.width, this.lightCanvas.height);
@@ -50,7 +58,8 @@ class colPick {
 		this.lightCanvas.addEventListener('mouseup', this.upLight, false);
 		this.lightCanvas.addEventListener('mousemove', this.moveLight, false);
 		this.lightCanvas.addEventListener('mouseout', this.outLight, false);
-		this.mainCanvas.addEventListener('touchstart', this.touchLight, false);
+		this.lightCanvas.addEventListener('touchstart', this.touchLight, false);
+		this.lightCanvas.addEventListener('touchmove', this.touchLight, false);
 		this.lightCanvas.parent = this;
 		this.fillLight(this.lightCanvas);
 
@@ -58,9 +67,9 @@ class colPick {
 		this.showcol.style.display = "block";
 		this.showcol.style.position = "absolute";
 		this.showcol.style.top = "10px";
-		this.showcol.style.left = "300px";
-		this.showcol.style.width = "30px";
-		this.showcol.style.height = "30px";
+		this.showcol.style.left = "305px";
+		this.showcol.style.width = "60px";
+		this.showcol.style.height = "60px";
 		this.mainDiv.appendChild(this.showcol);
 
 		this.okB = document.createElement('button');
@@ -152,7 +161,6 @@ class colPick {
 			let mpMain = this.parent.mainCanvas.mp;
 			let l = mp.y / this.height;
 			this.parent.l = l;
-			console.log(l);
 			let rgb = colPick.hslToRgb(mpMain.x / this.parent.mainCanvas.width, 1 - (mpMain.y / this.parent.mainCanvas.height), l);
 			this.parent.rgb = rgb;
 			this.parent.showcol.style.backgroundColor = this.parent.hexValue();
@@ -169,16 +177,27 @@ class colPick {
 		this.mousePressed = false;
 	}
 
-	touchMain(evt) {
-		// "this" is the Canvas
-		let mp = {
+	static getTouchPos(evt) {
+		let tp = {
 			x: 0,
 			y: 0
 		};
-		mp.x = Math.floor(evt.targetTouches[0].clientX);
-		mp.y = Math.floor(evt.targetTouches[0].clientY);
+		tp.x = Math.floor(evt.targetTouches[0].clientX);
+		tp.y = Math.floor(evt.targetTouches[0].clientY);
+		let rect = evt.srcElement.getBoundingClientRect();
+		tp.x -= rect.left;
+		tp.y -= rect.top;
+		if (tp.x < 0) tp.x = 0;
+		if (tp.x > rect.width) tp.x = rect.width;
+		if (tp.y < 0) tp.y = 0;
+		if (tp.y > rect.height) tp.y = rect.height;
+		return tp;
+	}
+
+	touchMain(evt) {
+		// "this" is the Canvas
+		let mp = colPick.getTouchPos(evt);
 		this.mp = mp;
-		// console.log("Mouse Pressed at " + mp.x + ", " + mp.y);
 		let rgb = colPick.hslToRgb(mp.x / this.width, 1 - (mp.y / this.height), this.parent.l);
 		this.parent.rgb = rgb;
 		this.parent.fillLight(this.parent.lightCanvas);
@@ -188,12 +207,7 @@ class colPick {
 
 	touchLight(evt) {
 		// "this" is the Canvas
-		let mp = {
-			x: 0,
-			y: 0
-		};
-		mp.x = Math.floor(evt.targetTouches[0].clientX);
-		mp.y = Math.floor(evt.targetTouches[0].clientY);
+		let mp = colPick.getTouchPos(evt);
 		let mpMain = this.parent.mainCanvas.mp;
 		let l = mp.y / this.height;
 		this.parent.l = l;
