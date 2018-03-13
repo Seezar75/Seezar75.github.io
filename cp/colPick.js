@@ -95,8 +95,19 @@ class colPick {
 		});
 		this.mainDiv.appendChild(this.cancelB);
 
+		this.colText = document.createElement('input');
+		this.colText.setAttribute('type', 'text');
+		this.colText.setAttribute('maxlength', '7');
+		this.colText.style.position = "absolute";
+		this.colText.style.top = "270px";
+		this.colText.style.left = "195px";
+		this.colText.style.width = "70px";
+		this.colText.addEventListener('change', this.validateColor, false);
+		this.mainDiv.appendChild(this.colText);
+		this.colText.parent = this;
+		this.colText.value = this.hexValue();
 
-		this.showcol.style.backgroundColor = "rgb(" + Math.floor(this.rgb.r) + ", " + Math.floor(this.rgb.g) + ", " + Math.floor(this.rgb.b) + ")";
+		this.showcol.style.backgroundColor = this.hexValue();
 	}
 
 	getMousePos(canvas, evt) {
@@ -118,6 +129,7 @@ class colPick {
 		this.parent.rgb = rgb;
 		this.parent.fillLight(this.parent.lightCanvas);
 		this.parent.showcol.style.backgroundColor = this.parent.hexValue();
+		this.parent.colText.value = this.parent.hexValue();
 	}
 
 	moveMain(evt) {
@@ -128,6 +140,7 @@ class colPick {
 			this.parent.rgb = rgb;
 			this.parent.fillLight(this.parent.lightCanvas);
 			this.parent.showcol.style.backgroundColor = this.parent.hexValue();
+			this.parent.colText.value = this.parent.hexValue();
 		}
 	}
 
@@ -153,6 +166,7 @@ class colPick {
 		let rgb = colPick.hslToRgb(mpMain.x / this.parent.mainCanvas.width, 1 - (mpMain.y / this.parent.mainCanvas.height), l);
 		this.parent.rgb = rgb;
 		this.parent.showcol.style.backgroundColor = this.parent.hexValue();
+		this.parent.colText.value = this.parent.hexValue();
 	}
 
 	moveLight(evt) {
@@ -164,6 +178,7 @@ class colPick {
 			let rgb = colPick.hslToRgb(mpMain.x / this.parent.mainCanvas.width, 1 - (mpMain.y / this.parent.mainCanvas.height), l);
 			this.parent.rgb = rgb;
 			this.parent.showcol.style.backgroundColor = this.parent.hexValue();
+			this.parent.colText.value = this.parent.hexValue();
 		}
 	}
 
@@ -258,7 +273,8 @@ class colPick {
 		this.mainCanvas.mp.x = hsl.h * this.mainCanvas.width;
 		this.mainCanvas.mp.y = (1 - hsl.s) * this.mainCanvas.height;
 		this.fillLight(this.lightCanvas);
-		this.showcol.style.backgroundColor = "rgb(" + Math.floor(this.rgb.r) + ", " + Math.floor(this.rgb.g) + ", " + Math.floor(this.rgb.b) + ")";
+		this.showcol.style.backgroundColor = this.hexValue();
+		this.colText.value = this.hexValue();
 	}
 
 	setColorHex(hexColor) {
@@ -358,10 +374,20 @@ class colPick {
 		}
 		let m = l - (chroma / 2);
 		return {
-			r: Math.floor((r + m) * 255),
-			g: Math.floor((g + m) * 255),
-			b: Math.floor((b + m) * 255)
+			r: Math.round((r + m) * 255),
+			g: Math.round((g + m) * 255),
+			b: Math.round((b + m) * 255)
 		};
+	}
+
+	validateColor(evt) {
+		let text = evt.srcElement.value.toUpperCase();
+		let regExp = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/
+		if (regExp.test(text)) {
+			this.parent.setColorHex(text);
+		} else {
+			// Invalid color
+		}
 	}
 
 }
