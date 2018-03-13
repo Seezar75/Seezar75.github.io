@@ -2,6 +2,13 @@ class colPick {
 	constructor(div, callback) {
 		this.mainDiv = div;
 
+		div.style.minWidth = "376px";
+		div.style.minHeight = "300px";
+		//let dispStyle = div.style.display;
+		//div.style.display = "block";
+		//console.log(div.getBoundingClientRect());
+		//div.style.display = dispStyle;
+		//window.addEventListener('resize', () => {console.log("Resize");});
 		this.rgb = {
 			r: 255,
 			g: 0,
@@ -14,8 +21,8 @@ class colPick {
 
 		this.mainCanvas = document.createElement('canvas');
 		this.mainCtx = this.mainCanvas.getContext("2d");
-		this.mainCanvas.setAttribute('width', '255');
-		this.mainCanvas.setAttribute('height', '255');
+		this.mainCanvas.setAttribute('width', '256');
+		this.mainCanvas.setAttribute('height', '256');
 		this.mainCanvas.style.display = "block";
 		this.mainCanvas.style.position = "absolute";
 		this.mainCanvas.style.top = "10px";
@@ -38,11 +45,11 @@ class colPick {
 		this.lightCanvas = document.createElement('canvas');
 		this.lightCtx = this.lightCanvas.getContext("2d");
 		this.lightCanvas.setAttribute('width', '20');
-		this.lightCanvas.setAttribute('height', '255');
+		this.lightCanvas.setAttribute('height', '256');
 		this.lightCanvas.style.display = "block";
 		this.lightCanvas.style.position = "absolute";
 		this.lightCanvas.style.top = "10px";
-		this.lightCanvas.style.left = "270px";
+		this.lightCanvas.style.left = "276px";
 		this.mainDiv.appendChild(this.lightCanvas);
 		this.lightCtx.fillStyle = "black";
 		this.lightCtx.fillRect(0, 0, this.lightCanvas.width, this.lightCanvas.height);
@@ -58,9 +65,9 @@ class colPick {
 		this.showcol.style.display = "block";
 		this.showcol.style.position = "absolute";
 		this.showcol.style.top = "10px";
-		this.showcol.style.left = "300px";
-		this.showcol.style.width = "30px";
-		this.showcol.style.height = "30px";
+		this.showcol.style.left = "306px";
+		this.showcol.style.width = "60px";
+		this.showcol.style.height = "60px";
 		this.mainDiv.appendChild(this.showcol);
 
 		this.okB = document.createElement('button');
@@ -152,7 +159,6 @@ class colPick {
 			let mpMain = this.parent.mainCanvas.mp;
 			let l = mp.y / this.height;
 			this.parent.l = l;
-			console.log(l);
 			let rgb = colPick.hslToRgb(mpMain.x / this.parent.mainCanvas.width, 1 - (mpMain.y / this.parent.mainCanvas.height), l);
 			this.parent.rgb = rgb;
 			this.parent.showcol.style.backgroundColor = this.parent.hexValue();
@@ -178,7 +184,6 @@ class colPick {
 		mp.x = Math.floor(evt.targetTouches[0].clientX);
 		mp.y = Math.floor(evt.targetTouches[0].clientY);
 		this.mp = mp;
-		// console.log("Mouse Pressed at " + mp.x + ", " + mp.y);
 		let rgb = colPick.hslToRgb(mp.x / this.width, 1 - (mp.y / this.height), this.parent.l);
 		this.parent.rgb = rgb;
 		this.parent.fillLight(this.parent.lightCanvas);
