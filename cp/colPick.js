@@ -20,6 +20,10 @@ class colPick {
 		this.callback = callback;
 
 		this.mainCanvas = document.createElement('canvas');
+		this.mainCanvas.mp = {
+			x: 0,
+			y: 0
+		}
 		this.mainCtx = this.mainCanvas.getContext("2d");
 		this.mainCanvas.setAttribute('width', '255');
 		this.mainCanvas.setAttribute('height', '255');
@@ -37,11 +41,8 @@ class colPick {
 		this.mainCanvas.addEventListener('touchstart', this.touchMain, false);
 		this.mainCanvas.addEventListener('touchmove', this.touchMain, false);
 		this.mainCanvas.parent = this;
+		this.imageDataMain = this.initMain(this.mainCanvas);
 		this.fillMain(this.mainCanvas);
-		this.mainCanvas.mp = {
-			x: 0,
-			y: 0
-		}
 
 		this.lightCanvas = document.createElement('canvas');
 		this.lightCtx = this.lightCanvas.getContext("2d");
@@ -128,17 +129,22 @@ class colPick {
 		let rgb = colPick.hslToRgb(mp.x / this.width, 1 - (mp.y / this.height), this.parent.l);
 		this.parent.rgb = rgb;
 		this.parent.fillLight(this.parent.lightCanvas);
+		this.parent.fillMain(this.parent.mainCanvas);
 		this.parent.showcol.style.backgroundColor = this.parent.hexValue();
 		this.parent.colText.value = this.parent.hexValue();
 	}
 
 	moveMain(evt) {
+		if (evt.button == 0 && evt.buttons == 1) {
+			this.mousePressed = true;
+		}
 		if (this.mousePressed) {
 			let mp = this.parent.getMousePos(this, evt);
 			this.mp = mp;
 			let rgb = colPick.hslToRgb(mp.x / this.width, 1 - (mp.y / this.height), this.parent.l);
 			this.parent.rgb = rgb;
 			this.parent.fillLight(this.parent.lightCanvas);
+			this.parent.fillMain(this.parent.mainCanvas);
 			this.parent.showcol.style.backgroundColor = this.parent.hexValue();
 			this.parent.colText.value = this.parent.hexValue();
 		}
@@ -165,11 +171,15 @@ class colPick {
 		this.parent.l = l;
 		let rgb = colPick.hslToRgb(mpMain.x / this.parent.mainCanvas.width, 1 - (mpMain.y / this.parent.mainCanvas.height), l);
 		this.parent.rgb = rgb;
+		this.parent.fillLight(this.parent.lightCanvas);
 		this.parent.showcol.style.backgroundColor = this.parent.hexValue();
 		this.parent.colText.value = this.parent.hexValue();
 	}
 
 	moveLight(evt) {
+		if (evt.button == 0 && evt.buttons == 1) {
+			this.mousePressed = true;
+		}
 		if (this.mousePressed) {
 			let mp = this.parent.getMousePos(this, evt);
 			let mpMain = this.parent.mainCanvas.mp;
@@ -177,6 +187,7 @@ class colPick {
 			this.parent.l = l;
 			let rgb = colPick.hslToRgb(mpMain.x / this.parent.mainCanvas.width, 1 - (mpMain.y / this.parent.mainCanvas.height), l);
 			this.parent.rgb = rgb;
+			this.parent.fillLight(this.parent.lightCanvas);
 			this.parent.showcol.style.backgroundColor = this.parent.hexValue();
 			this.parent.colText.value = this.parent.hexValue();
 		}
@@ -216,6 +227,7 @@ class colPick {
 		let rgb = colPick.hslToRgb(mp.x / this.width, 1 - (mp.y / this.height), this.parent.l);
 		this.parent.rgb = rgb;
 		this.parent.fillLight(this.parent.lightCanvas);
+		this.parent.fillMain(this.parent.mainCanvas);
 		this.parent.showcol.style.backgroundColor = this.parent.hexValue();
 		evt.preventDefault();
 	}
@@ -229,10 +241,11 @@ class colPick {
 		let rgb = colPick.hslToRgb(mpMain.x / this.parent.mainCanvas.width, 1 - (mpMain.y / this.parent.mainCanvas.height), l);
 		this.parent.rgb = rgb;
 		this.parent.showcol.style.backgroundColor = this.parent.hexValue();
+		this.parent.fillLight(this.parent.lightCanvas);
 		evt.preventDefault();
 	}
 
-	fillMain(canvas) {
+	initMain(canvas) {
 		let ctx = canvas.getContext("2d");
 		let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 		let data = imageData.data;
@@ -243,9 +256,19 @@ class colPick {
 			data[i] = rgb.r;
 			data[i + 1] = rgb.g;
 			data[i + 2] = rgb.b;
-
 		}
-		ctx.putImageData(imageData, 0, 0);
+		return imageData;
+	}
+
+	fillMain(canvas) {
+		let ctx = canvas.getContext("2d");
+		ctx.putImageData(this.imageDataMain, 0, 0);
+		ctx.beginPath();
+		let hsl = colPick.rgbToHsl(this.rgb.r, this.rgb.g, this.rgb.b);
+		ctx.fillStyle = "white";
+		ctx.arc(this.mainCanvas.mp.x, this.mainCanvas.mp.y, 4, 0, Math.PI * 2);
+		ctx.stroke();
+		ctx.closePath();
 	}
 
 	fillLight(canvas) {
@@ -254,14 +277,17 @@ class colPick {
 		let data = imageData.data;
 		for (let i = 0; i < data.length; i += 4) {
 			let y = Math.floor(i / 4 / canvas.width) / canvas.height;
-			let hsl = colPick.rgbToHsl(this.rgb.r, this.rgb.g, this.rgb.b);
-			let rgb = colPick.hslToRgb(hsl.h, hsl.s, y);
+			// let hsl = colPick.rgbToHsl(this.rgb.r, this.rgb.g, this.rgb.b);
+			let rgb = colPick.hslToRgb(this.mainCanvas.mp.x / this.mainCanvas.width, 1 - (this.mainCanvas.mp.y / this.mainCanvas.height), y);
 			data[i] = rgb.r;
 			data[i + 1] = rgb.g;
 			data[i + 2] = rgb.b;
 
 		}
 		ctx.putImageData(imageData, 0, 0);
+		ctx.strokeStyle = "black";
+		if (this.l < 0.3) ctx.strokeStyle = "white";
+		ctx.strokeRect(0, this.l * canvas.height - 1, canvas.width, 3);
 	}
 
 	setColorRGB(r, g, b) {
@@ -273,6 +299,7 @@ class colPick {
 		this.mainCanvas.mp.x = hsl.h * this.mainCanvas.width;
 		this.mainCanvas.mp.y = (1 - hsl.s) * this.mainCanvas.height;
 		this.fillLight(this.lightCanvas);
+		this.fillMain(this.mainCanvas);
 		this.showcol.style.backgroundColor = this.hexValue();
 		this.colText.value = this.hexValue();
 	}
