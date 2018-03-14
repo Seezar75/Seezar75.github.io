@@ -408,7 +408,7 @@ class colPick {
 	}
 
 	validateColor(evt) {
-		let text = evt.srcElement.value.toUpperCase();
+		let text = evt.target.value.toUpperCase();
 		let regExp = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/
 		if (regExp.test(text)) {
 			this.parent.setColorHex(text);
