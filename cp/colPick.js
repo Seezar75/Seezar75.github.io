@@ -2,8 +2,8 @@ class colPick {
 	constructor(div, callback) {
 		this.mainDiv = div;
 
-		div.style.minWidth = "376px";
-		div.style.minHeight = "300px";
+		div.style.minWidth = "377px";
+		div.style.minHeight = "305px";
 		//let dispStyle = div.style.display;
 		//div.style.display = "block";
 		//console.log(div.getBoundingClientRect());
@@ -25,8 +25,8 @@ class colPick {
 			y: 0
 		}
 		this.mainCtx = this.mainCanvas.getContext("2d");
-		this.mainCanvas.setAttribute('width', '255');
-		this.mainCanvas.setAttribute('height', '255');
+		this.mainCanvas.setAttribute('width', '257');
+		this.mainCanvas.setAttribute('height', '257');
 		this.mainCanvas.style.display = "block";
 		this.mainCanvas.style.position = "absolute";
 		this.mainCanvas.style.top = "10px";
@@ -47,11 +47,11 @@ class colPick {
 		this.lightCanvas = document.createElement('canvas');
 		this.lightCtx = this.lightCanvas.getContext("2d");
 		this.lightCanvas.setAttribute('width', '20');
-		this.lightCanvas.setAttribute('height', '255');
+		this.lightCanvas.setAttribute('height', '257');
 		this.lightCanvas.style.display = "block";
 		this.lightCanvas.style.position = "absolute";
 		this.lightCanvas.style.top = "10px";
-		this.lightCanvas.style.left = "275px";
+		this.lightCanvas.style.left = "277px";
 		this.mainDiv.appendChild(this.lightCanvas);
 		this.lightCtx.fillStyle = "black";
 		this.lightCtx.fillRect(0, 0, this.lightCanvas.width, this.lightCanvas.height);
@@ -68,7 +68,7 @@ class colPick {
 		this.showcol.style.display = "block";
 		this.showcol.style.position = "absolute";
 		this.showcol.style.top = "10px";
-		this.showcol.style.left = "305px";
+		this.showcol.style.left = "307px";
 		this.showcol.style.width = "60px";
 		this.showcol.style.height = "60px";
 		this.mainDiv.appendChild(this.showcol);
@@ -76,7 +76,7 @@ class colPick {
 		this.okB = document.createElement('button');
 		this.okB.style.display = "block";
 		this.okB.style.position = "absolute";
-		this.okB.style.top = "270px";
+		this.okB.style.top = "275px";
 		this.okB.style.left = "10px";
 		this.okB.innerHTML = "OK";
 		this.okB.addEventListener("click", () => {
@@ -88,7 +88,7 @@ class colPick {
 		this.cancelB = document.createElement('button');
 		this.cancelB.style.display = "block";
 		this.cancelB.style.position = "absolute";
-		this.cancelB.style.top = "270px";
+		this.cancelB.style.top = "275px";
 		this.cancelB.style.left = "60px";
 		this.cancelB.innerHTML = "Cancel";
 		this.cancelB.addEventListener("click", () => {
@@ -100,8 +100,8 @@ class colPick {
 		this.colText.setAttribute('type', 'text');
 		this.colText.setAttribute('maxlength', '7');
 		this.colText.style.position = "absolute";
-		this.colText.style.top = "270px";
-		this.colText.style.left = "195px";
+		this.colText.style.top = "275px";
+		this.colText.style.left = "197px";
 		this.colText.style.width = "70px";
 		this.colText.addEventListener('change', this.validateColor, false);
 		this.mainDiv.appendChild(this.colText);
@@ -126,7 +126,7 @@ class colPick {
 		}
 		let mp = this.parent.getMousePos(this, evt);
 		this.mp = mp;
-		let rgb = colPick.hslToRgb(mp.x / this.width, 1 - (mp.y / this.height), this.parent.l);
+		let rgb = colPick.hslToRgb(mp.x / this.width, 1 - (mp.y / (this.height - 1)), this.parent.l);
 		this.parent.rgb = rgb;
 		this.parent.fillLight(this.parent.lightCanvas);
 		this.parent.fillMain(this.parent.mainCanvas);
@@ -141,7 +141,7 @@ class colPick {
 		if (this.mousePressed) {
 			let mp = this.parent.getMousePos(this, evt);
 			this.mp = mp;
-			let rgb = colPick.hslToRgb(mp.x / this.width, 1 - (mp.y / this.height), this.parent.l);
+			let rgb = colPick.hslToRgb(mp.x / this.width, 1 - (mp.y / (this.height - 1)), this.parent.l);
 			this.parent.rgb = rgb;
 			this.parent.fillLight(this.parent.lightCanvas);
 			this.parent.fillMain(this.parent.mainCanvas);
@@ -167,7 +167,7 @@ class colPick {
 		}
 		let mp = this.parent.getMousePos(this, evt);
 		let mpMain = this.parent.mainCanvas.mp;
-		let l = mp.y / this.height;
+		let l = mp.y / (this.height - 1);
 		this.parent.l = l;
 		let rgb = colPick.hslToRgb(mpMain.x / this.parent.mainCanvas.width, 1 - (mpMain.y / this.parent.mainCanvas.height), l);
 		this.parent.rgb = rgb;
@@ -183,7 +183,7 @@ class colPick {
 		if (this.mousePressed) {
 			let mp = this.parent.getMousePos(this, evt);
 			let mpMain = this.parent.mainCanvas.mp;
-			let l = mp.y / this.height;
+			let l = mp.y / (this.height - 1);
 			this.parent.l = l;
 			let rgb = colPick.hslToRgb(mpMain.x / this.parent.mainCanvas.width, 1 - (mpMain.y / this.parent.mainCanvas.height), l);
 			this.parent.rgb = rgb;
@@ -214,9 +214,9 @@ class colPick {
 		tp.x -= rect.left;
 		tp.y -= rect.top;
 		if (tp.x < 0) tp.x = 0;
-		if (tp.x > rect.width) tp.x = rect.width;
+		if (tp.x >= rect.width) tp.x = rect.width - 1;
 		if (tp.y < 0) tp.y = 0;
-		if (tp.y > rect.height) tp.y = rect.height;
+		if (tp.y >= rect.height) tp.y = rect.height - 1;
 		return tp;
 	}
 
@@ -224,11 +224,12 @@ class colPick {
 		// "this" is the Canvas
 		let mp = colPick.getTouchPos(evt);
 		this.mp = mp;
-		let rgb = colPick.hslToRgb(mp.x / this.width, 1 - (mp.y / this.height), this.parent.l);
+		let rgb = colPick.hslToRgb(mp.x / this.width, 1 - (mp.y / (this.height - 1)), this.parent.l);
 		this.parent.rgb = rgb;
 		this.parent.fillLight(this.parent.lightCanvas);
 		this.parent.fillMain(this.parent.mainCanvas);
 		this.parent.showcol.style.backgroundColor = this.parent.hexValue();
+		this.parent.colText.value = this.parent.hexValue();
 		evt.preventDefault();
 	}
 
@@ -236,12 +237,13 @@ class colPick {
 		// "this" is the Canvas
 		let mp = colPick.getTouchPos(evt);
 		let mpMain = this.parent.mainCanvas.mp;
-		let l = mp.y / this.height;
+		let l = mp.y / (this.height - 1);
 		this.parent.l = l;
 		let rgb = colPick.hslToRgb(mpMain.x / this.parent.mainCanvas.width, 1 - (mpMain.y / this.parent.mainCanvas.height), l);
 		this.parent.rgb = rgb;
 		this.parent.showcol.style.backgroundColor = this.parent.hexValue();
 		this.parent.fillLight(this.parent.lightCanvas);
+		this.parent.colText.value = this.parent.hexValue();
 		evt.preventDefault();
 	}
 
@@ -264,8 +266,7 @@ class colPick {
 		let ctx = canvas.getContext("2d");
 		ctx.putImageData(this.imageDataMain, 0, 0);
 		ctx.beginPath();
-		let hsl = colPick.rgbToHsl(this.rgb.r, this.rgb.g, this.rgb.b);
-		ctx.fillStyle = "white";
+		ctx.strokeStyle = "black";
 		ctx.arc(this.mainCanvas.mp.x, this.mainCanvas.mp.y, 4, 0, Math.PI * 2);
 		ctx.stroke();
 		ctx.closePath();
@@ -275,14 +276,14 @@ class colPick {
 		let ctx = canvas.getContext("2d");
 		let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 		let data = imageData.data;
-		for (let i = 0; i < data.length; i += 4) {
+		for (let i = 0; i < data.length; i += 4 * canvas.width) {
 			let y = Math.floor(i / 4 / canvas.width) / canvas.height;
-			// let hsl = colPick.rgbToHsl(this.rgb.r, this.rgb.g, this.rgb.b);
 			let rgb = colPick.hslToRgb(this.mainCanvas.mp.x / this.mainCanvas.width, 1 - (this.mainCanvas.mp.y / this.mainCanvas.height), y);
-			data[i] = rgb.r;
-			data[i + 1] = rgb.g;
-			data[i + 2] = rgb.b;
-
+			for (let j = 0; j < canvas.width; j++) {
+				data[i + (j * 4)] = rgb.r;
+				data[i + 1 + (j * 4)] = rgb.g;
+				data[i + 2 + (j * 4)] = rgb.b;
+			}
 		}
 		ctx.putImageData(imageData, 0, 0);
 		ctx.strokeStyle = "black";
@@ -374,36 +375,31 @@ class colPick {
 		let h1 = h / 60;
 		let x = chroma * (1 - Math.abs(h1 % 2 - 1));
 		let r, g, b;
-		if (0 <= h1 && h1 <= 1) {
+		r = g = b = 0;
+		if (0 <= h1 && h1 < 1) {
 			r = chroma;
 			g = x;
-			b = 0;
-		} else if (1 <= h1 && h1 <= 2) {
+		} else if (1 <= h1 && h1 < 2) {
 			r = x;
 			g = chroma;
-			b = 0;
-		} else if (2 <= h1 && h1 <= 3) {
-			r = 0;
+		} else if (2 <= h1 && h1 < 3) {
 			g = chroma;
 			b = x;
-		} else if (3 <= h1 && h1 <= 4) {
-			r = 0;
+		} else if (3 <= h1 && h1 < 4) {
 			g = x;
 			b = chroma;
-		} else if (4 <= h1 && h1 <= 5) {
+		} else if (4 <= h1 && h1 < 5) {
 			r = x;
-			g = 0;
 			b = chroma;
-		} else if (5 <= h1 && h1 <= 6) {
+		} else if (5 <= h1 && h1 < 6) {
 			r = chroma;
-			g = 0;
 			b = x;
 		}
 		let m = l - (chroma / 2);
 		return {
-			r: Math.round((r + m) * 255),
-			g: Math.round((g + m) * 255),
-			b: Math.round((b + m) * 255)
+			r: Math.round((r + m) * 255.0),
+			g: Math.round((g + m) * 255.0),
+			b: Math.round((b + m) * 255.0)
 		};
 	}
 
