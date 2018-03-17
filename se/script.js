@@ -43,6 +43,7 @@ let showMenu = 0;
 let mode = 0;
 let preventMouseTouch = 0;
 let idSelected = -1;
+let bgColor = "#000000"
 
 let touchStatus = 0;
 let lastTouch = new Date().getTime();
@@ -56,7 +57,7 @@ let food = [];
 let foodType = 0;
 const foodColors = ['rgb(0, 255, 0)', 'rgb(0, 90, 0)', 'rgb(255, 255, 0)', 'rgb(90, 90, 0)', 'rgb(255, 0, 255)', 'rgb(90, 0, 90)'];
 const foodNames = ['Bigger', 'Smaller', 'Faster', 'Slower', 'Longer', 'Shorter'];
-const modeNames = ['Serpentelli', 'Food', 'Walls', 'Obstacles', 'Change color'];
+const modeNames = ['Serpentelli', 'Food', 'Walls', 'Obstacles', 'Color Serpentello', "Color All Serpentelli", "Color background"];
 
 function setup() {
 
@@ -89,7 +90,7 @@ function loop() {
 	}
 
 	// clear screen
-	ctx.fillStyle = "black";
+	ctx.fillStyle = bgColor;
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 	for (let s of serpentelli) {
@@ -97,10 +98,13 @@ function loop() {
 		if (pause == 0) {
 			// update direction and speed
 			s.update(mousePos);
+		}
+	}
 
+	for (let s of serpentelli) {
+		if (pause == 0) {
 			// increment position
 			s.move();
-
 		}
 		// draw coso
 		s.draw();
@@ -370,6 +374,12 @@ function mouseDownHandler(evt) {
 		} else {
 			idSelected = -1;
 		}
+	} else if (mode == 5) {
+		cp.setColorHex(serpentelli[0].color);
+		cp.show();
+	} else if (mode == 6) {
+		cp.setColorHex(bgColor);
+		cp.show();
 	}
 }
 
@@ -477,6 +487,12 @@ function touchStartHandler(evt) {
 		} else {
 			idSelected = -1;
 		}
+	} else if (mode == 5) {
+		cp.setColorHex(serpentelli[0].color);
+		cp.show();
+	} else if (mode == 6) {
+		cp.setColorHex(bgColor);
+		cp.show();
 	}
 
 	evt.preventDefault();
@@ -655,7 +671,15 @@ function getRandomInt(min, max) {
 }
 
 function onColorSelected(hexColor) {
-	if (idSelected != -1) {
-		serpentelli[idSelected].color = hexColor;
-	};
+	if (mode == 4) {
+		if (idSelected != -1) {
+			serpentelli[idSelected].color = hexColor;
+		};
+	} else if (mode == 5) {
+		for (s of serpentelli) {
+			s.color = hexColor;
+		}
+	} else if (mode == 6) {
+		bgColor = hexColor;
+	}
 }
