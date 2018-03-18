@@ -102,6 +102,13 @@ class Serpentello {
 			followVect.normalize();
 			followVect.multiplyScalar(1 / this.followRate);
 			this.velVect.add(followVect);
+		} else if (follow == 2) {
+			let relative = new Vector(pos.x - this.x, pos.y - this.y);
+			let dist = relative.getModule();
+			relative.normalize();
+			relative.neg();
+			relative.multiplyScalar(6500 / (dist * dist * this.followRate));
+			this.velVect.add(relative);
 		}
 
 		// Randomize velocity vector slightly

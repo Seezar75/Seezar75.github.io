@@ -573,14 +573,17 @@ function cycleModes() {
 
 function toggleFollow() {
 	let s = document.getElementById("followP");
+	follow++;
+	if (follow > 2) follow = 0;
 	if (follow == 0) {
-		follow = 1;
-		s.style.color = '#0B0';
-		s.innerHTML = "ON";
-	} else {
-		follow = 0;
 		s.style.color = '#F00';
 		s.innerHTML = "OFF";
+	} else if (follow == 1) {
+		s.style.color = '#0B0';
+		s.innerHTML = "Follow";
+	} else {
+		s.style.color = '#0B0';
+		s.innerHTML = "Repell";
 	}
 }
 
