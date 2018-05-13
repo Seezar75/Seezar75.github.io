@@ -17,8 +17,8 @@ window.onload = function() {
 	canvas.addEventListener('touchstart', touchStartHandler, false);
 	canvas.addEventListener('touchend', touchEndHandler, false);
 	canvas.addEventListener('touchcancel', touchCancelHandler, false);
-	setInterval(loop, 20);
 	setup();
+	window.requestAnimationFrame(loop);
 }
 
 let canvas;
@@ -39,6 +39,7 @@ let aligning = 0;
 let grouping = 0;
 let noise = 0.1;
 let pause = 0;
+let survival = 0;
 let showMenu = 0;
 let mode = 0;
 let preventMouseTouch = 0;
@@ -101,12 +102,19 @@ function loop() {
 		}
 	}
 
+	let i = serpentelli.length
+	while (i--) {
+		if (serpentelli[i].delete == 1) {
+			serpentelli.splice(i, 1);
+		}
+	}
+
 	for (let s of serpentelli) {
 		if (pause == 0) {
-			// increment position
+			// update position
 			s.move();
 		}
-		// draw coso
+		// draw serpentello
 		s.draw();
 	}
 
@@ -194,6 +202,7 @@ function loop() {
 	ctx.lineTo(32, 30);
 	ctx.stroke();
 
+	window.requestAnimationFrame(loop);
 
 }
 
@@ -594,6 +603,7 @@ function toggleBounceOthers() {
 		s.style.color = '#0B0';
 		s.innerHTML = "ON";
 		if (aligning == 1) toggleFlocking();
+		if (survival == 1) toggleSurvival();
 	} else {
 		bounceOthers = 0;
 		s.style.color = '#F00';
@@ -609,6 +619,7 @@ function toggleFlocking() {
 		s.style.color = '#0B0';
 		s.innerHTML = "ON";
 		if (bounceOthers == 1) toggleBounceOthers();
+		if (survival == 1) toggleSurvival();
 	} else {
 		aligning = 0;
 		grouping = 0;
@@ -625,6 +636,21 @@ function togglePause() {
 		s.innerHTML = "ON";
 	} else {
 		pause = 0;
+		s.style.color = '#F00';
+		s.innerHTML = "OFF";
+	}
+}
+
+function toggleSurvival() {
+	let s = document.getElementById("survivalP");
+	if (survival == 0) {
+		survival = 1;
+		s.style.color = '#0B0';
+		s.innerHTML = "ON";
+		if (aligning == 1) toggleFlocking();
+		if (bounceOthers == 1) toggleBounceOthers();
+	} else {
+		survival = 0;
 		s.style.color = '#F00';
 		s.innerHTML = "OFF";
 	}
