@@ -38,6 +38,13 @@ class Vector {
 		this.x = this.x * v.x - this.y * v.y;
 		this.y = tempX * v.y + this.y * v.x;
 	}
+	
+	divide(v) {
+		let tempX = this.x;
+		let den = v.x * v.x + v.y * v.y
+		this.x = (this.x * v.x + this.y * v.y) / den;
+		this.y = (this.y * v.x - tempX * v.y) / den;
+	}
 
 	dot(v) {
 		return (this.x * v.x) + (this.y * v.y);
