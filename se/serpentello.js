@@ -22,6 +22,7 @@ class Serpentello {
 		this.intensity = 0.05;
 		this.calcParams(this.intensity);
 		this.passIndexes = [];
+		this.delete = 0;
 	}
 
 	draw() {
@@ -69,6 +70,7 @@ class Serpentello {
 	}
 
 	drawBodySegment(startIndex, endIndex, totalLength) {
+		if (startIndex < 0) return;
 		let v1;
 		let siz = this.size * startIndex / totalLength;
 		let Vr = new Vector(0, -1);
@@ -293,6 +295,30 @@ class Serpentello {
 				this.velVect.y = -this.velVect.y;
 				this.y = this.size;
 			}
+		}
+
+		//survival mode
+		if (survival == 1) {
+			let ootherDistVect = new Vector(0, 0);
+			for (let s of serpentelli) {
+				if (this != s) {
+					let relative = new Vector(s.x - this.x, s.y - this.y);
+					let dist = relative.getModule() - (this.size + s.size);
+					relative.normalize();
+					relative.multiplyScalar(3500 / (dist * dist * this.followRate));
+					if (this.size <= s.size) {
+						relative.multiplyScalar(-1);
+						if (dist <= 0) {
+							this.delete = 1;
+							s.targetSize = Math.sqrt(s.targetSize * s.targetSize + (this.size * this.size) / 2);
+						}
+					}
+					ootherDistVect.add(relative);
+				} else {
+					// It's me
+				}
+			}
+			this.velVect.add(ootherDistVect);
 		}
 
 		this.velVect.normalize();
