@@ -1,0 +1,179 @@
+<html>
+<body onload="display()">
+
+<script>
+function render() {
+
+	let mainSVG = document.getElementById("mainSVG");
+
+	const nFrets = Number(document.getElementById("nFrets").value)+1;
+	const bridgeSpacing = Number(document.getElementById("lSpacing").value);
+	const scale = Number(document.getElementById("lScale").value);
+	const nutSpacing = Number(document.getElementById("lSpacingNut").value);
+	const nStrings = Number(document.getElementById("nStrings").value);
+	const marginPerc = 1-Number(document.getElementById("lMargin").value)/50;
+	const nutWidth = (nStrings-marginPerc)*nutSpacing;
+	const fretboardWidthAtBridge = (nStrings-marginPerc)*bridgeSpacing;
+	const dotRadius = Number(document.getElementById("lDotSize").value)/2;
+	const doubleDotSpacingPerc = Number(document.getElementById("lDoubleDotSpacing").value);
+	const pickupPos = Number(document.getElementById("lPickupPos").value);
+	
+	let svgHeight = scale + 164;
+	mainSVG.setAttribute("height", ((svgHeight)/10) + "cm");
+	mainSVG.setAttribute("viewBox", "0 0 420 " + svgHeight);
+	
+	const fretboardWidthAt12thFret = (scale/2)*(fretboardWidthAtBridge-nutWidth)/scale+nutWidth;
+	//console.log(nutWidth);
+	//console.log(fretboardWidthAt12thFret);
+	
+	let innerSVG = "";
+	
+	//Bridge units
+	let bridgeUnit = `	<defs>
+		<g id="bridge-unit"> 
+			<title>Bridge unit</title>
+			<desc>Single bridge unit</desc> 
+			<rect style="opacity:1;fill:white;stroke:#000000;stroke-width:0.5;stroke-opacity:1" width="10" height="75" x="-5" y="-5" /> 
+			<path d="M -5,0 5,0" id="axis-1" style="fill:none;stroke:#000000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" /> 
+		</g>
+	</defs>\r\n`;
+	innerSVG = innerSVG + "\r\n" + bridgeUnit;
+	
+	//Fret Marks
+	let fretmarks = `	<g style="fill:none;stroke:#0000FF;stroke-width:0.28222221px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" id="fret-marks" transform="translate(210 40)">\r\n`;
+	for (let i = 0; i < nFrets; i++) {
+		let fromNut = scale-(scale*Math.pow(2, -i/12));
+		fretmarks = fretmarks + `		<path d="M -90,${fromNut} 90,${fromNut}" id="fretm-${i}" />\r\n`;
+	}
+	fretmarks = fretmarks + "	</g>\r\n";
+	innerSVG = innerSVG + "\r\n" + fretmarks;
+	
+	//Fretboard
+	let fretboard = `	<g style="fill:none;stroke:#000000;stroke-width:0.28222221px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" id="fretboard" transform="translate(210 40)">\r\n`;
+	letfretWireLength = 0;
+	for (let i = 0; i < nFrets; i++) {
+		let fromNut = scale-(scale*Math.pow(2, -i/12));
+		let fretWidth = fromNut*(fretboardWidthAtBridge-nutWidth)/scale+nutWidth;
+		letfretWireLength += fretWidth;
+		fretboard = fretboard + `		<path d="M -${fretWidth/2},${fromNut} ${fretWidth/2},${fromNut}" id="fret-${i}" />\r\n`;
+	}
+	document.getElementById("fretWire").innerHTML = " (fret wire length = " + letfretWireLength.toFixed(0) + " mm)";
+	fretboard = fretboard + `		<g style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:${2*dotRadius-1};stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" id="dots" >\r\n`;
+	for (let i = 0; i < nFrets-1; i++) {
+		let nFretMod = i%12+1;
+		let dotPosY = ((scale-(scale*Math.pow(2, -i/12))) + (scale-(scale*Math.pow(2, -(i+1)/12))))/2
+		let dotSpacing = (dotPosY*(fretboardWidthAtBridge-nutWidth)/scale+nutWidth)*doubleDotSpacingPerc/200;
+		if (nFretMod==3 || nFretMod==5 || nFretMod==7 || nFretMod==9) {
+			fretboard = fretboard + `			<ellipse cx="0" cy="${dotPosY}" rx="${dotRadius}" ry="${dotRadius}" id="dot${i}" />\r\n`;
+		} else if (nFretMod==12) {
+			fretboard = fretboard + `			<ellipse cx="-${dotSpacing}" cy="${dotPosY}" rx="${dotRadius}" ry="${dotRadius}" id="dot${i}-1" />\r\n`;
+			fretboard = fretboard + `			<ellipse cx="${dotSpacing}" cy="${dotPosY}" rx="${dotRadius}" ry="${dotRadius}" id="dot${i}-2" />\r\n`;
+		}
+	}
+	fretboard = fretboard + "		</g>\r\n";
+	let fretboardLength = scale-(scale*Math.pow(2, -(nFrets-1)/12));
+	let fretboardWidth = fretboardLength*(fretboardWidthAtBridge-nutWidth)/scale+nutWidth;
+	fretboard = fretboard + `		<path d="M -${nutWidth/2},0 ${nutWidth/2},0 ${fretboardWidth/2},${fretboardLength} -${fretboardWidth/2},${fretboardLength} Z" id="fretboardOutline" />\r\n`;
+	fretboard = fretboard + `		<path d="M 0,-20 0,${scale+70}" id="axis-1" style="fill:none;stroke:#FF0000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />\r\n`;
+	fretboard = fretboard + "	</g>\r\n";
+	innerSVG = innerSVG + "\r\n" + fretboard;
+	
+	//Bridge
+	let bridge = `	<g id="bridge" transform="translate(210 ${scale+40})">\r\n`;
+	if ((nStrings%2) == 0) {
+		for (let i = 0; i < nStrings/2; i++) {
+			bridge = bridge + `		<use x="-${bridgeSpacing*(i+0.5)}" y="0" xlink:href="#bridge-unit" />\r\n`;
+			bridge = bridge + `		<use x="${bridgeSpacing*(i+0.5)}" y="0" xlink:href="#bridge-unit" />\r\n`;
+		}
+		
+	} else {
+		for (let i = 0; i < (nStrings-1)/2; i++) {
+			bridge = bridge + `		<use x="-${bridgeSpacing*(i+1)}" y="0" xlink:href="#bridge-unit" />\r\n`;
+			bridge = bridge + `		<use x="${bridgeSpacing*(i+1)}" y="0" xlink:href="#bridge-unit" />\r\n`;
+		}
+		bridge = bridge + `		<use x="0" y="0" xlink:href="#bridge-unit" />\r\n`;
+	}
+	bridge = bridge + '		<path d="M -90,0 90,0" id="axis-2" style="fill:none;stroke:#FF0000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />\r\n';
+	bridge = bridge + '		<path d="M 0,-20 0,90" id="axis-3" style="fill:none;stroke:#FF0000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />\r\n';
+	bridge = bridge + "	</g>\r\n";
+	innerSVG = innerSVG + "\r\n" + bridge;
+
+	//Pickup
+	let spacingAtPickup = pickupPos*(bridgeSpacing-nutSpacing)/scale+nutSpacing;
+	let pickup = `	<g id="pickup" transform="translate(210 ${pickupPos+40})">\r\n`;
+	pickup = pickup + `		<text x="70" y="0" style="font-family: Arial; font-size: 7">String spacing = ${spacingAtPickup.toFixed(2)}</text>\r\n`;
+	pickup = pickup + `		<rect style="opacity:1;fill:white;stroke:#000000;stroke-width:0.5;stroke-opacity:1" width="108.5" height="32" x="-54.25" y="-16" rx="3" ry="3"/>\r\n`;
+	pickup = pickup + `		<ellipse cx="-48.75" cy="-10" rx="2" ry="2" style="fill:none;stroke:#000000;stroke-width:1"/>\r\n`;
+	pickup = pickup + `		<ellipse cx="-48.75" cy="10" rx="2" ry="2" style="fill:none;stroke:#000000;stroke-width:1"/>\r\n`;
+	pickup = pickup + `		<ellipse cx="48.75" cy="0" rx="2" ry="2" style="fill:none;stroke:#000000;stroke-width:1"/>\r\n`;
+	pickup = pickup + '		<path d="M -90,0 90,0" id="axis-2" style="fill:none;stroke:#FF0000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />\r\n';
+	pickup = pickup + "	</g>\r\n";
+	innerSVG = innerSVG + "\r\n" + pickup;
+	
+	//Strings
+	let strings = `	<g id="strings" transform="translate(210 40)">\r\n`;
+	if ((nStrings%2) == 0) {
+		for (let i = 0; i < nStrings/2; i++) {
+			strings = strings + `		<path d="M -${(i+0.5)*nutSpacing},-15 -${(i+0.5)*nutSpacing},0 -${(i+0.5)*bridgeSpacing},${scale} -${(i+0.5)*bridgeSpacing},${scale+20}" id="string-${i}l" style="fill:none;stroke:#008800;stroke-width:1;stroke-linecap:butt;stroke-linejoin:round;stroke-opacity:1" />\r\n`;
+			strings = strings + `		<path d="M ${(i+0.5)*nutSpacing},-15 ${(i+0.5)*nutSpacing},0 ${(i+0.5)*bridgeSpacing},${scale} ${(i+0.5)*bridgeSpacing},${scale+20}" id="string-${i}r" style="fill:none;stroke:#008800;stroke-width:1;stroke-linecap:butt;stroke-linejoin:round;stroke-opacity:1" />\r\n`;
+		}
+		
+	} else {
+		for (let i = 0; i < (nStrings-1)/2; i++) {
+			strings = strings + `		<path d="M -${(i+1)*nutSpacing},-15 -${(i+1)*nutSpacing},0 -${(i+1)*bridgeSpacing},${scale} -${(i+1)*bridgeSpacing},${scale+20}" id="string-${i}l" style="fill:none;stroke:#008800;stroke-width:1;stroke-linecap:butt;stroke-linejoin:round;stroke-opacity:1" />\r\n`;
+			strings = strings + `		<path d="M ${(i+1)*nutSpacing},-15 ${(i+1)*nutSpacing},0 ${(i+1)*bridgeSpacing},${scale} ${(i+1)*bridgeSpacing},${scale+20}" id="string-${i}r" style="fill:none;stroke:#008800;stroke-width:1;stroke-linecap:butt;stroke-linejoin:round;stroke-opacity:1" />\r\n`;
+		}
+		strings = strings + `		<path d="M 0,-15 0,0 0,${scale} 0,${scale+20}" id="string-0" style="fill:none;stroke:#008800;stroke-width:1;stroke-linecap:butt;stroke-linejoin:round;stroke-opacity:1" />\r\n`;
+	}
+	strings = strings + "	</g>\r\n";
+	innerSVG = innerSVG + "\r\n" + strings;
+	
+	return innerSVG;
+}
+
+function display() {
+	let mainSVG = document.getElementById("mainSVG");
+	mainSVG.innerHTML = render();
+}
+
+function download() {
+
+	const scale = Number(document.getElementById("lScale").value);
+
+	let fileContent = `<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#"  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="mainSVG" width="42cm" height="${((scale+164)/10)}cm" viewBox="0 0 420 ${scale+164}">\r\n`;
+	fileContent = fileContent + render();
+	fileContent = fileContent + '</svg>';
+	
+    let pom = document.createElement('a');
+    pom.setAttribute('href', 'data:image/svg+xml,' + encodeURIComponent(fileContent));
+    pom.setAttribute('download', 'MiniBass2.svg');
+
+    if (document.createEvent) {
+        let event = document.createEvent('MouseEvents');
+        event.initEvent('click', true, true);
+        pom.dispatchEvent(event);
+    }
+    else {
+        pom.click();
+    }
+}
+
+</script>
+<input type="text" id="nStrings" name="nStrings" value="5" onChange="display();"> <label for="nStrings">Strings</label> <br>
+<input type="text" id="nFrets" name="nFrets" value="16" onChange="display();"> <label for="nFrets">Frets</label> <label id="fretWire"></label><br>
+<input type="text" id="lScale" name="lScale" value="430.0" onChange="display();"> <label for="lScale">Scale (mm)</label> <br>
+<input type="text" id="lSpacing" name="lSpacing" value="18.0" onChange="display();"> <label for="lSpacing">String spacing at bridge (mm)</label> <br>
+<input type="text" id="lSpacingNut" name="lSpacingNut" value="13.1" onChange="display();"> <label for="lSpacingNut">String spacing at nut (mm)</label> <br>
+<input type="text" id="lMargin" name="lMargin" value="40" onChange="display();"> <label for="lMargin">String margin (% of string spacing)</label> <br>
+<input type="text" id="lDotSize" name="lDotSize" value="3.4" onChange="display();"> <label for="lDotSize">Dot size (mm)</label> <br>
+<input type="text" id="lDoubleDotSpacing" name="lDoubleDotSpacing" value="50" onChange="display();"> <label for="lDoubleDotSpacing">Double dot spacing (% of fretboard width)</label> <br>
+<input type="text" id="lPickupPos" name="lPickupPos" value="320" onChange="display();"> <label for="lPickupPos">Pickup position (from nut)</label> <br>
+<button type="button" onClick="display();">Render</button>
+<button type="button" onClick="download();">Download</button></br>
+
+<svg id="mainSVG" width="42cm" height="59.4cm" viewBox="0 0 420 594">
+</svg>
+
+
+</body>
+</html>
