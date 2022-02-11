@@ -1,0 +1,35 @@
+<html>
+<img id="myImg" style="display: none">
+
+<head>
+	<title>Background remover</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="./styles/style.css">
+</head>
+
+<header>
+	Background remover
+</header>
+
+<section>
+	<nav>
+		<input type="file" onchange="onFileSelected(event)">
+		<button id="B1" onClick="test()">Preview</button>
+		<button id="B2" onClick="save()">Save</button>
+		<select name="combo1" id="outputType" onchange="outputTypeChange()">
+			<option value="image">Image</option>
+			<option value="bg">background</option>
+		</select>
+	</nav>
+	
+	<panel>
+		<canvas id="myCanvas"></canvas>
+	</panel>
+</section>
+
+<script type="text/javascript" src="./scripts/script.js"></script>
+<script type="text/javascript" src="./scripts/linAlg.js"></script>
+<script type="text/javascript" src="./scripts/marker.js"></script>
+
+</html>
