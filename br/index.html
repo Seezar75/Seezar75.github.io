@@ -12,21 +12,43 @@
 	Background remover
 </header>
 
-<section>
-	<nav>
+<div id="sidebar">
+	<div class="toolbarSection">
+		<h3>File</h3>
 		<input type="file" onchange="onFileSelected(event)">
-		<button id="B1" onClick="test()">Preview</button>
+	</div>
+	<div class="toolbarSection">
+		<button id="B1" onClick="process()">Preview</button>
 		<button id="B2" onClick="save()">Save</button>
+	</div>
+	<div class="toolbarSection">
+		<h3>Markers</h3>
+		<button id="B3" onClick="addMarker()">+</button>
+		<button id="B4" onClick="subtractMarker()">-</button>
+		<select name="combo2" id="markerSize" onchange="markerSizeChange(this)">
+			<option value="3">3x3</option>
+			<option value="5">5x5</option>
+			<option value="7">7x7</option>
+		</select>
+	</div>
+	<div class="toolbarSection">
+		<h3>Output</h3>
 		<select name="combo1" id="outputType" onchange="outputTypeChange()">
 			<option value="image">Image</option>
 			<option value="bg">background</option>
 		</select>
-	</nav>
-	
-	<panel>
-		<canvas id="myCanvas"></canvas>
-	</panel>
-</section>
+	</div>
+	<div class="toolbarSection">
+		<h3>Amount (<span id="correctionAmountLab">0</span>)</h3>
+		<input type="range" min="0" max="100" value="0" class="slider" id="correctionAmount" oninput="amountChange(this)">
+	</div>
+	<div class="toolbarSection">
+		<h3>Test</h3>
+		<button id="B5" onClick="test()">Test</button>
+	</div>
+</div>
+
+<canvas id="myCanvas"></canvas>
 
 <script type="text/javascript" src="./scripts/script.js"></script>
 <script type="text/javascript" src="./scripts/linAlg.js"></script>
