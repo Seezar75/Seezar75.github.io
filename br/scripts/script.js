@@ -20,10 +20,16 @@ window.onload = function() {
 }
 
 let imgtag = document.getElementById("myImg");
+// Reset after new image is loaded
 imgtag.onload = function() {
-	init()
+	if (imgtag.width > 10) {
+		canvas.width = imgtag.width;
+		canvas.height = imgtag.height;
+	}
+	init();
 };
 
+// Load new image
 function onFileSelected(event) {
 	var selectedFile = event.target.files[0];
 	var reader = new FileReader();
@@ -39,32 +45,31 @@ function onFileSelected(event) {
 	reader.readAsDataURL(selectedFile);
   }
 
+// Initialize markers
 function init(){
-
-	ctx.lineWidth = 2;
 
 	let img=document.getElementById("myImg");
 
 	markers = [];
 
-	let color = "#FF2222"
-	let size = 9
+	let color = "#33FF33";
+	let size = parseInt(document.getElementById("markerSize").value);
 
 	markers = []
 	selectedMarker = -1
 	markers.push(new Marker(10,10,size,color))
-	markers.push(new Marker(img.width/2,10,size,color))
-	markers.push(new Marker(img.width-10,10,size,color))
+	markers.push(new Marker(canvas.width/2,10,size,color))
+	markers.push(new Marker(canvas.width-10,10,size,color))
 
-	markers.push(new Marker(10,img.height/2,size,color))
+	markers.push(new Marker(10,canvas.height/2,size,color))
 	
-	markers.push(new Marker(img.width-10,img.height/2,size,color))
+	markers.push(new Marker(canvas.width-10,canvas.height/2,size,color))
 
-	markers.push(new Marker(10,img.height-10,size,color))
-	markers.push(new Marker(img.width/2,img.height-10,size,color))
-	markers.push(new Marker(img.width-10,img.height-10,size,color))
+	markers.push(new Marker(10,canvas.height-10,size,color))
+	markers.push(new Marker(canvas.width/2,canvas.height-10,size,color))
+	markers.push(new Marker(canvas.width-10,canvas.height-10,size,color))
 
-	markers.push(new Marker(img.width/2,img.height/2,size,color))
+	markers.push(new Marker(canvas.width/2,canvas.height/2,size,color))
 
 	draw();
 }
@@ -99,17 +104,20 @@ function process() {
 		let redTemp = 0;
 		let greenTemp = 0;
 		let blueTemp = 0;
-		for (let i = -1; i < 2; i++) {
-			for (let j = -1; j < 2; j++) {
+		// sampling image
+		let offset = (m.size-1)/2;
+		for (let i = -1*offset; i < offset+1; i++) {
+			for (let j = -1*offset; j < offset+1; j++) {
 				let indexR = ((m.x+i)*4)+((m.y+j)*can_out.width*4);
 				redTemp += dataIn[indexR];
 				greenTemp += dataIn[indexR+1];
 				blueTemp += dataIn[indexR+2];
 			}
 		}
-		redTemp = redTemp / 9;
-		greenTemp = greenTemp / 9;
-		blueTemp = blueTemp / 9;
+		let samples = m.size*m.size;
+		redTemp = redTemp / samples;
+		greenTemp = greenTemp / samples;
+		blueTemp = blueTemp / samples;
 		z_red.push(redTemp);
 		z_green.push(greenTemp);
 		z_blue.push(blueTemp);
@@ -171,6 +179,11 @@ function process() {
 				dataOut[indexR+2] = blue
 			}
 		}
+
+		// Compute amount of correction to apply
+		let correctionAmount = document.getElementById("correctionAmount").value;
+		bgMax = bgMax + ((255-bgMax)*correctionAmount/100)
+
 		// Subtracting backgrount from image
 		for (let i = 0; i < can_out.height; i++) {
 			for (let j = 0; j < can_out.width; j++) {
@@ -188,9 +201,13 @@ function process() {
 }
 
 function test() {
-	process();
+	let myImageIn = canvas.getContext("2d").getImageData(0, 0, canvas.width, canvas.height);
+	let dataIn = myImageIn.data;
+	let indexR = (markers[0].x*4)+(markers[0].y*canvas.width*4);
+	console.log(dataIn[indexR] + " - " + dataIn[indexR+1] + " - " + dataIn[indexR+2])
 }
 
+// Save output image (corrected image or background)
 function save() {
 	process();
 	const link = document.createElement('a');
@@ -209,17 +226,10 @@ function outputTypeChange() {
 	}
 }
 
-function loop() {
-	draw();
-	window.requestAnimationFrame(loop);
-}
-
 function draw() {
 	let img=document.getElementById("myImg");
-	if (img.width > 10) {
-		canvas.width = img.width;
-		canvas.height = img.height;
-	}
+	ctx.fillStyle="white";
+	ctx.fillRect(0,0,canvas.width,canvas.height);
 	ctx.drawImage(img, 0, 0);
 	for (let m of markers) {
 		m.draw(ctx);
@@ -236,7 +246,6 @@ function getMousePos(canvas, evt) {
 
 function mouseDownHandler(evt) {
 	mousePos = getMousePos(canvas, evt);
-
 	getMarker(mousePos);
 	draw();
 }
@@ -252,6 +261,7 @@ function mouseMoveHandler(evt) {
 	if (selectedMarker != -1) {
 		markers[selectedMarker].x = Math.round(mousePos.x);
 		markers[selectedMarker].y = Math.round(mousePos.y);
+		markers[selectedMarker].check(canvas);
 	}
 	draw();
 }
@@ -261,9 +271,36 @@ function getMarker(pos) {
 
 	for (let i = 0; i < markers.length; i++) {
 		let dist = ((pos.x-markers[i].x)*(pos.x-markers[i].x)) + ((pos.y-markers[i].y)*(pos.y-markers[i].y))
-		if (dist < 400 && dist < minDistance) {
+		if (dist < 250 && dist < minDistance) {
 			minDistance = dist;
 			selectedMarker = i;
 		}
 	}
+}
+
+function addMarker() {
+	let img=document.getElementById("myImg");
+	let color = "#33FF33"
+	let size = parseInt(document.getElementById("markerSize").value);
+	markers.push(new Marker(img.width/2,img.height/2,size,color));
+	draw();
+}
+
+function subtractMarker() {
+	markers.pop();
+	draw();
+}
+
+function amountChange(selectedObject) {
+	document.getElementById("correctionAmountLab").innerHTML = selectedObject.value;
+}
+
+function markerSizeChange(selectedObject) {
+	for (let m of markers) {
+		m.size = parseInt(selectedObject.value);
+		m.check(canvas);
+	}
+	draw();
+	let offset = (markers[0].size-1)/2;
+	console.log(offset);
 }
