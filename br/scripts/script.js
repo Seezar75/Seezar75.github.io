@@ -1,5 +1,5 @@
-let canvas
-var A
+let canvas;
+var A;
 let bg = false;
 let markers = [];
 let selectedMarker = -1;
@@ -50,26 +50,24 @@ function init(){
 
 	let img=document.getElementById("myImg");
 
-	markers = [];
-
 	let color = "#33FF33";
 	let size = parseInt(document.getElementById("markerSize").value);
 
-	markers = []
-	selectedMarker = -1
-	markers.push(new Marker(10,10,size,color))
-	markers.push(new Marker(canvas.width/2,10,size,color))
-	markers.push(new Marker(canvas.width-10,10,size,color))
+	markers = [];
+	selectedMarker = -1;
+	markers.push(new Marker(10,10,size,color));
+	markers.push(new Marker(canvas.width/2,10,size,color));
+	markers.push(new Marker(canvas.width-10,10,size,color));
 
-	markers.push(new Marker(10,canvas.height/2,size,color))
+	markers.push(new Marker(10,canvas.height/2,size,color));
 	
-	markers.push(new Marker(canvas.width-10,canvas.height/2,size,color))
+	markers.push(new Marker(canvas.width-10,canvas.height/2,size,color));
 
-	markers.push(new Marker(10,canvas.height-10,size,color))
-	markers.push(new Marker(canvas.width/2,canvas.height-10,size,color))
-	markers.push(new Marker(canvas.width-10,canvas.height-10,size,color))
+	markers.push(new Marker(10,canvas.height-10,size,color));
+	markers.push(new Marker(canvas.width/2,canvas.height-10,size,color));
+	markers.push(new Marker(canvas.width-10,canvas.height-10,size,color));
 
-	markers.push(new Marker(canvas.width/2,canvas.height/2,size,color))
+	markers.push(new Marker(canvas.width/2,canvas.height/2,size,color));
 
 	draw();
 }
@@ -124,10 +122,10 @@ function process() {
 	}
 
 	// Fill matrix
-	let I = new Array(x.length)
-	let xx = new Array(x.length)
-	let xy = new Array(x.length)
-	let yy = new Array(x.length)
+	let I = new Array(x.length);
+	let xx = new Array(x.length);
+	let xy = new Array(x.length);
+	let yy = new Array(x.length);
 	for (let i = 0; i < I.length; i++) {
 		I[i]= 1;
 		xx[i]= x[i]*x[i];
@@ -140,9 +138,9 @@ function process() {
 	A = transp(A);
 
 	// Calculate linear Least squares solution for the three channels
-	let coefs_red = solve(A,z_red);
-	let coefs_green = solve(A,z_green);
-	let coefs_blue = solve(A,z_blue);
+	let coefs_red = leastSquaresSolve(A,z_red);
+	let coefs_green = leastSquaresSolve(A,z_green);
+	let coefs_blue = leastSquaresSolve(A,z_blue);
 
 	let bgMax = 0;
 
@@ -152,9 +150,9 @@ function process() {
 			for (let j = 0; j < can_out.width; j++) {
 				let indexR = (j*4)+(i*can_out.width*4);
 				// Calculating background channels
-				red = coefs_red[0] + coefs_red[1]*j + coefs_red[2]*i + coefs_red[3]*i*j + coefs_red[4]*j*j + coefs_red[5]*i*i
-				green = coefs_green[0] + coefs_green[1]*j + coefs_green[2]*i + coefs_green[3]*i*j + coefs_green[4]*j*j + coefs_green[5]*i*i
-				blue = coefs_blue[0] + coefs_blue[1]*j + coefs_blue[2]*i + coefs_blue[3]*i*j + coefs_blue[4]*j*j + coefs_blue[5]*i*i
+				red = coefs_red[0] + coefs_red[1]*j + coefs_red[2]*i + coefs_red[3]*i*j + coefs_red[4]*j*j + coefs_red[5]*i*i;
+				green = coefs_green[0] + coefs_green[1]*j + coefs_green[2]*i + coefs_green[3]*i*j + coefs_green[4]*j*j + coefs_green[5]*i*i;
+				blue = coefs_blue[0] + coefs_blue[1]*j + coefs_blue[2]*i + coefs_blue[3]*i*j + coefs_blue[4]*j*j + coefs_blue[5]*i*i;
 				dataOut[indexR] = red;
 				dataOut[indexR+1] = green;
 				dataOut[indexR+2] = blue;
@@ -167,16 +165,16 @@ function process() {
 			for (let j = 0; j < can_out.width; j++) {
 				let indexR = (j*4)+(i*can_out.width*4);
 				// Calculating background channels
-				red = coefs_red[0] + coefs_red[1]*j + coefs_red[2]*i + coefs_red[3]*i*j + coefs_red[4]*j*j + coefs_red[5]*i*i
-				green = coefs_green[0] + coefs_green[1]*j + coefs_green[2]*i + coefs_green[3]*i*j + coefs_green[4]*j*j + coefs_green[5]*i*i
-				blue = coefs_blue[0] + coefs_blue[1]*j + coefs_blue[2]*i + coefs_blue[3]*i*j + coefs_blue[4]*j*j + coefs_blue[5]*i*i
+				red = coefs_red[0] + coefs_red[1]*j + coefs_red[2]*i + coefs_red[3]*i*j + coefs_red[4]*j*j + coefs_red[5]*i*i;
+				green = coefs_green[0] + coefs_green[1]*j + coefs_green[2]*i + coefs_green[3]*i*j + coefs_green[4]*j*j + coefs_green[5]*i*i;
+				blue = coefs_blue[0] + coefs_blue[1]*j + coefs_blue[2]*i + coefs_blue[3]*i*j + coefs_blue[4]*j*j + coefs_blue[5]*i*i;
 				// Calculating max of background
 				if (red > bgMax) bgMax = red;
 				if (green > bgMax) bgMax = green;
 				if (blue > bgMax) bgMax = blue;
 				dataOut[indexR] = red;
 				dataOut[indexR+1] = green;
-				dataOut[indexR+2] = blue
+				dataOut[indexR+2] = blue;
 			}
 		}
 
@@ -200,11 +198,13 @@ function process() {
 	ctx.putImageData(myImageDataOut, 0, 0);
 }
 
+
+
 function test() {
 	let myImageIn = canvas.getContext("2d").getImageData(0, 0, canvas.width, canvas.height);
 	let dataIn = myImageIn.data;
 	let indexR = (markers[0].x*4)+(markers[0].y*canvas.width*4);
-	console.log(dataIn[indexR] + " - " + dataIn[indexR+1] + " - " + dataIn[indexR+2])
+	console.log(`${dataIn[indexR]} - ${dataIn[indexR+1]}  - ${dataIn[indexR+2]}`);
 }
 
 // Save output image (corrected image or background)
@@ -280,7 +280,7 @@ function getMarker(pos) {
 
 function addMarker() {
 	let img=document.getElementById("myImg");
-	let color = "#33FF33"
+	let color = "#33FF33";
 	let size = parseInt(document.getElementById("markerSize").value);
 	markers.push(new Marker(img.width/2,img.height/2,size,color));
 	draw();
@@ -301,6 +301,4 @@ function markerSizeChange(selectedObject) {
 		m.check(canvas);
 	}
 	draw();
-	let offset = (markers[0].size-1)/2;
-	console.log(offset);
 }
