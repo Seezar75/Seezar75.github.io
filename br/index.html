@@ -22,7 +22,7 @@
 		<input type="file" onchange="onFileSelected(event)">
 	</div>
 	<div class="toolbarSection">
-		<button id="B1" onClick="process()">Preview</button>
+		<button id="B1" onClick="previewFull()">Full preview</button>
 		<button id="B2" onClick="save()">Save</button>
 	</div>
 	<div class="toolbarSection">
@@ -44,11 +44,15 @@
 	</div>
 	<div class="toolbarSection">
 		<h3>Amount (<span id="correctionAmountLab">0</span>)</h3>
-		<input type="range" min="0" max="100" value="0" class="slider" id="correctionAmount" oninput="amountChange(this)">
+		<input type="range" min="0" max="100" value="0" class="slider" id="correctionAmount" onchange="amountChange(this)" oninput="amountInput(this)">
 	</div>
-	<div class="toolbarSection">
+	<div class="toolbarSection" hidden>
 		<h3>Test</h3>
 		<button id="B5" onClick="test()">Test</button>
+	</div>
+	<div class="toolbarSection">
+		<h3>Preview</h3>
+		<canvas id="previewCanvas"></canvas>
 	</div>
 </div>
 
