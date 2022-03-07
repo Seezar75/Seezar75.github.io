@@ -1,5 +1,11 @@
+// Main image canvas and context
 let canvas;
-var A;
+let ctx;
+
+// Preview image canvas and context
+let preCanvas;
+let preCtx;
+
 let bg = false;
 let markers = [];
 let selectedMarker = -1;
@@ -7,6 +13,10 @@ let selectedMarker = -1;
 window.onload = function() {
 	canvas = document.getElementById("myCanvas");
 	ctx = canvas.getContext("2d");
+
+	preCanvas = document.getElementById("previewCanvas");
+	preCtx = preCanvas.getContext("2d");
+
 	mousePos = {
 		x: canvas.width / 2,
 		y: canvas.height / 2
@@ -25,8 +35,16 @@ imgtag.onload = function() {
 	if (imgtag.width > 10) {
 		canvas.width = imgtag.width;
 		canvas.height = imgtag.height;
+
+		// draw preview image
+		preCanvas.width = 150;
+		let scale = preCanvas.width/imgtag.width;
+		preCanvas.height = imgtag.height*scale;
+		preCtx.drawImage(imgtag, 0, 0, preCanvas.width, preCanvas.height);
+		console.log(`Preview canvas width = ${preCanvas.width}, preview canvas height = ${preCanvas.height}, scale = ${scale}, `)
 	}
 	init();
+
 };
 
 // Load new image
@@ -48,8 +66,6 @@ function onFileSelected(event) {
 // Initialize markers
 function init(){
 
-	let img=document.getElementById("myImg");
-
 	let color = "#33FF33";
 	let size = parseInt(document.getElementById("markerSize").value);
 
@@ -70,23 +86,47 @@ function init(){
 	markers.push(new Marker(canvas.width/2,canvas.height/2,size,color));
 
 	draw();
+
+	if (imgtag.width > 10)	previewSmall();
 }
 
-function process() {
-	// Get source image and draw it on canvas
-	let img=document.getElementById("myImg");
-	ctx.drawImage(img, 0, 0);
+function previewFull() {
+	// draw source image on canvas
+	ctx.drawImage(imgtag, 0, 0);
+
+	process(canvas, ctx, 1);
+}
+
+function previewSmall() {
+
+	if (imgtag.width < 10) return;
+
+	// draw preview image
+	preCanvas.width = 150;
+	let scale = preCanvas.width/imgtag.width;
+	preCanvas.height = imgtag.height*scale;
+	preCtx.drawImage(imgtag, 0, 0, preCanvas.width, preCanvas.height);
+	// console.log(`Preview canvas width = ${preCanvas.width}, preview canvas height = ${preCanvas.height}, scale = ${scale}, `)
+
+	process(preCanvas, preCtx, scale);
+}
+
+function process(inCanvas, outCtx, scale) {
 
 	// Create output image
 	var can_out = document.createElement('canvas');
-	can_out.width = canvas.width;
-	can_out.height = canvas.height;
+	can_out.width = inCanvas.width;
+	can_out.height = inCanvas.height;
 	let myImageDataOut = can_out.getContext("2d").getImageData(0, 0, can_out.width, can_out.height);
 	let dataOut = myImageDataOut.data;
 
-	// Get data of input image from canvas
-	let myImageIn = canvas.getContext("2d").getImageData(0, 0, canvas.width, canvas.height);
+	// Get data of input image from canvas (full image or preview)
+	let myImageIn = inCanvas.getContext("2d").getImageData(0, 0, inCanvas.width, inCanvas.height);
 	let dataIn = myImageIn.data;
+
+	// Get data of input image from full canvas
+	let fullImageIn = canvas.getContext("2d").getImageData(0, 0, canvas.width, canvas.height);
+	let fullDataIn = fullImageIn.data;
 
 	// Initialize vectors
 	let x = [];
@@ -97,19 +137,19 @@ function process() {
 
 	// Fill input vectors
 	for (let m of markers) {
-		x.push(m.x);
-		y.push(m.y);
+		x.push(m.x * scale);
+		y.push(m.y * scale);
 		let redTemp = 0;
 		let greenTemp = 0;
 		let blueTemp = 0;
-		// sampling image
+		// sampling full image
 		let offset = (m.size-1)/2;
 		for (let i = -1*offset; i < offset+1; i++) {
 			for (let j = -1*offset; j < offset+1; j++) {
-				let indexR = ((m.x+i)*4)+((m.y+j)*can_out.width*4);
-				redTemp += dataIn[indexR];
-				greenTemp += dataIn[indexR+1];
-				blueTemp += dataIn[indexR+2];
+				let indexR = ((m.x+i)*4)+((m.y+j)*canvas.width*4);
+				redTemp += fullDataIn[indexR];
+				greenTemp += fullDataIn[indexR+1];
+				blueTemp += fullDataIn[indexR+2];
 			}
 		}
 		let samples = m.size*m.size;
@@ -132,7 +172,7 @@ function process() {
 		xy[i]= x[i]*y[i];
 		yy[i]= y[i]*y[i];
 	}
-	A = [I, x, y, xy, xx, yy];
+	let A = [I, x, y, xy, xx, yy];
 
 	// Transpose A
 	A = transp(A);
@@ -145,7 +185,7 @@ function process() {
 	let bgMax = 0;
 
 	if (bg) {
-		// Calculate estimated background image
+		// Calculate estimated background image (full or preview)
 		for (let i = 0; i < can_out.height; i++) {
 			for (let j = 0; j < can_out.width; j++) {
 				let indexR = (j*4)+(i*can_out.width*4);
@@ -160,7 +200,7 @@ function process() {
 			}
 		}
 	} else {
-		// Calculate estimated background image
+		// Calculate estimated background image  (full or preview)
 		for (let i = 0; i < can_out.height; i++) {
 			for (let j = 0; j < can_out.width; j++) {
 				let indexR = (j*4)+(i*can_out.width*4);
@@ -182,7 +222,7 @@ function process() {
 		let correctionAmount = document.getElementById("correctionAmount").value;
 		bgMax = bgMax + ((255-bgMax)*correctionAmount/100)
 
-		// Subtracting backgrount from image
+		// Subtracting backgrount from image  (full or preview)
 		for (let i = 0; i < can_out.height; i++) {
 			for (let j = 0; j < can_out.width; j++) {
 				let indexR = (j*4)+(i*can_out.width*4);
@@ -195,7 +235,7 @@ function process() {
 	}
 	
 	// Draw output image on canvas
-	ctx.putImageData(myImageDataOut, 0, 0);
+	outCtx.putImageData(myImageDataOut, 0, 0);
 }
 
 
@@ -205,11 +245,12 @@ function test() {
 	let dataIn = myImageIn.data;
 	let indexR = (markers[0].x*4)+(markers[0].y*canvas.width*4);
 	console.log(`${dataIn[indexR]} - ${dataIn[indexR+1]}  - ${dataIn[indexR+2]}`);
+	previewSmall();
 }
 
 // Save output image (corrected image or background)
 function save() {
-	process();
+	previewFull();
 	const link = document.createElement('a');
 	link.download = 'download.jpg';
 	link.href = canvas.toDataURL("image/jpg");
@@ -224,6 +265,7 @@ function outputTypeChange() {
 	} else {
 		bg = false;
 	}
+	previewSmall();
 }
 
 function draw() {
@@ -253,6 +295,7 @@ function mouseDownHandler(evt) {
 function mouseUpHandler(evt) {
 	mousePos = getMousePos(canvas, evt);
 	selectedMarker = -1;
+	previewSmall();
 	draw();
 }
 
@@ -283,15 +326,22 @@ function addMarker() {
 	let color = "#33FF33";
 	let size = parseInt(document.getElementById("markerSize").value);
 	markers.push(new Marker(img.width/2,img.height/2,size,color));
+	previewSmall();
 	draw();
 }
 
 function subtractMarker() {
 	markers.pop();
+	previewSmall();
 	draw();
 }
 
 function amountChange(selectedObject) {
+	document.getElementById("correctionAmountLab").innerHTML = selectedObject.value;
+	previewSmall();
+}
+
+function amountInput(selectedObject) {
 	document.getElementById("correctionAmountLab").innerHTML = selectedObject.value;
 }
 
@@ -300,5 +350,6 @@ function markerSizeChange(selectedObject) {
 		m.size = parseInt(selectedObject.value);
 		m.check(canvas);
 	}
+	previewSmall();
 	draw();
 }
