@@ -16,11 +16,11 @@ header {
 }
 
 .toolbarSection {
-	display: block;
+	/*display: block;*/
 	margin: 10px 0px 0px;
 }
 
-canvas {
+canvas#myCanvas {
 	cursor: crosshair;
 	position: absolute;
 	left: 200px;
@@ -28,11 +28,15 @@ canvas {
 	outline: black 1px solid;
 }
 
+canvas#previewCanvas {
+	width: 100%;
+}
+
 div#sidebar {
 	position: absolute;
 	left: 0;
-	width: 150px;
-	padding: 10px 20px;
+	width: 170px;
+	padding: 10px 10px;
 	top: 80px;
 	background-color: darkgrey;
 }
