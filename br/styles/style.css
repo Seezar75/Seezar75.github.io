@@ -32,6 +32,10 @@ canvas#previewCanvas {
 	width: 100%;
 }
 
+canvas#hisCanvas {
+	width: 100%;
+}
+
 div#sidebar {
 	position: absolute;
 	left: 0;
