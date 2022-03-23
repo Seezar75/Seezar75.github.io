@@ -6,9 +6,23 @@ let ctx;
 let preCanvas;
 let preCtx;
 
+// Main image canvas and context
+let imgSourceCanvas;
+let imgSourceCtx;
+
+// Preview image canvas and context
+let preSourceCanvas;
+let preSourceCtx;
+
 let bg = false;
 let markers = [];
 let selectedMarker = -1;
+
+let cropMarkers = [];
+
+let currentTool = 1;
+
+let histogram;
 
 window.onload = function() {
 	canvas = document.getElementById("myCanvas");
@@ -16,6 +30,12 @@ window.onload = function() {
 
 	preCanvas = document.getElementById("previewCanvas");
 	preCtx = preCanvas.getContext("2d");
+
+	imgSourceCanvas = document.createElement('canvas');
+	imgSourceCtx = imgSourceCanvas.getContext("2d");
+
+	preSourceCanvas = document.createElement('canvas');
+	preSourceCtx = preSourceCanvas.getContext("2d");
 
 	mousePos = {
 		x: canvas.width / 2,
@@ -25,6 +45,15 @@ window.onload = function() {
 	canvas.addEventListener('mousemove', mouseMoveHandler, false);
 	canvas.addEventListener('mousedown', mouseDownHandler, false);
 	canvas.addEventListener('mouseup', mouseUpHandler, false);
+
+
+	document.getElementById("hisCanvas").width = 170;
+	document.getElementById("hisCanvas").height = 90;
+	histogram = new Histogram(document.getElementById("hisCanvas"));
+	histogram.setCallback(previewSmall);
+
+	cropMarkers.push({x:0,y:0});
+	cropMarkers.push({x:0,y:0});
 
 	init();
 }
@@ -36,12 +65,20 @@ imgtag.onload = function() {
 		canvas.width = imgtag.width;
 		canvas.height = imgtag.height;
 
-		// draw preview image
-		preCanvas.width = 150;
-		let scale = preCanvas.width/imgtag.width;
-		preCanvas.height = imgtag.height*scale;
-		preCtx.drawImage(imgtag, 0, 0, preCanvas.width, preCanvas.height);
-		console.log(`Preview canvas width = ${preCanvas.width}, preview canvas height = ${preCanvas.height}, scale = ${scale}, `)
+		// set full image source
+		imgSourceCanvas.width = imgtag.width;
+		imgSourceCanvas.height = imgtag.height;
+		imgSourceCtx.drawImage(imgtag, 0, 0);
+
+		// set preview image source
+		preSourceCanvas.width = 150;
+		let scale = preSourceCanvas.width/imgtag.width;
+		preSourceCanvas.height = imgtag.height*scale;
+		preSourceCtx.drawImage(imgtag, 0, 0, preSourceCanvas.width, preSourceCanvas.height);
+
+		histogram.updateData(imgSourceCanvas);
+		histogram.resetMarkers();
+		histogram.draw();
 	}
 	init();
 
@@ -85,16 +122,29 @@ function init(){
 
 	markers.push(new Marker(canvas.width/2,canvas.height/2,size,color));
 
+	cropMarkers[0].x = 20;
+	cropMarkers[0].y = 20;
+
+	cropMarkers[1].x = canvas.width-20;
+	cropMarkers[1].y = canvas.height-20;
+
 	draw();
 
 	if (imgtag.width > 10)	previewSmall();
 }
 
 function previewFull() {
-	// draw source image on canvas
-	ctx.drawImage(imgtag, 0, 0);
-
-	process(canvas, ctx, 1);
+	if (currentTool == 1) {
+		process(imgSourceCanvas, ctx, 1);
+	}
+	if (currentTool == 2) {
+		histogram.process(imgSourceCanvas, canvas);
+	}
+	if (currentTool == 3) {
+		ctx.fillStyle="white";
+		ctx.fillRect(0,0,canvas.width,canvas.height);
+		ctx.drawImage(imgtag, cropMarkers[0].x, cropMarkers[0].y, cropMarkers[1].x-cropMarkers[0].x, cropMarkers[1].y-cropMarkers[0].y, 0, 0, cropMarkers[1].x-cropMarkers[0].x, cropMarkers[1].y-cropMarkers[0].y)
+	}
 }
 
 function previewSmall() {
@@ -105,10 +155,14 @@ function previewSmall() {
 	preCanvas.width = 150;
 	let scale = preCanvas.width/imgtag.width;
 	preCanvas.height = imgtag.height*scale;
-	preCtx.drawImage(imgtag, 0, 0, preCanvas.width, preCanvas.height);
-	// console.log(`Preview canvas width = ${preCanvas.width}, preview canvas height = ${preCanvas.height}, scale = ${scale}, `)
 
-	process(preCanvas, preCtx, scale);
+	if (currentTool == 1) {
+		process(preSourceCanvas, preCtx, scale);
+	}
+	if (currentTool == 2) {
+		histogram.process(preSourceCanvas, preCanvas);
+	}
+	
 }
 
 function process(inCanvas, outCtx, scale) {
@@ -125,7 +179,7 @@ function process(inCanvas, outCtx, scale) {
 	let dataIn = myImageIn.data;
 
 	// Get data of input image from full canvas
-	let fullImageIn = canvas.getContext("2d").getImageData(0, 0, canvas.width, canvas.height);
+	let fullImageIn = imgSourceCanvas.getContext("2d").getImageData(0, 0, imgSourceCanvas.width, imgSourceCanvas.height);
 	let fullDataIn = fullImageIn.data;
 
 	// Initialize vectors
@@ -250,10 +304,9 @@ function test() {
 
 // Save output image (corrected image or background)
 function save() {
-	previewFull();
 	const link = document.createElement('a');
 	link.download = 'download.jpg';
-	link.href = canvas.toDataURL("image/jpg");
+	link.href = imgSourceCanvas.toDataURL("image/jpg");
 	link.click();
 	link.delete;
 }
@@ -269,14 +322,32 @@ function outputTypeChange() {
 }
 
 function draw() {
-	let img=document.getElementById("myImg");
 	ctx.fillStyle="white";
 	ctx.fillRect(0,0,canvas.width,canvas.height);
-	ctx.drawImage(img, 0, 0);
-	for (let m of markers) {
-		m.draw(ctx);
+	ctx.drawImage(imgtag, 0, 0);
+	if (currentTool == 1) {
+		for (let m of markers) {
+			m.draw(ctx);
+		}
 	}
-}
+	if (currentTool == 3) {
+		ctx.strokeStyle = "red";
+		ctx.lineWidth = 2
+
+		ctx.fillStyle="#33333366";
+		ctx.fillRect(0,0,canvas.width,cropMarkers[0].y);
+		ctx.fillRect(0,cropMarkers[1].y,canvas.width,canvas.height);
+		ctx.fillRect(0,cropMarkers[0].y,cropMarkers[0].x,cropMarkers[1].y-cropMarkers[0].y);
+		ctx.fillRect(cropMarkers[1].x,cropMarkers[0].y,canvas.width-cropMarkers[1].x,cropMarkers[1].y-cropMarkers[0].y);
+
+		ctx.beginPath();
+		ctx.rect(cropMarkers[0].x-3, cropMarkers[0].y-3, 7,7);
+		ctx.stroke();
+		ctx.beginPath();
+		ctx.rect(cropMarkers[1].x-3, cropMarkers[1].y-3, 7,7);
+		ctx.stroke();
+		}
+	}
 
 function getMousePos(canvas, evt) {
 	let rect = canvas.getBoundingClientRect();
@@ -302,23 +373,48 @@ function mouseUpHandler(evt) {
 function mouseMoveHandler(evt) {
 	mousePos = getMousePos(canvas, evt);
 	if (selectedMarker != -1) {
-		markers[selectedMarker].x = Math.round(mousePos.x);
-		markers[selectedMarker].y = Math.round(mousePos.y);
-		markers[selectedMarker].check(canvas);
+		if (currentTool == 1) {
+			markers[selectedMarker].x = Math.round(mousePos.x);
+			markers[selectedMarker].y = Math.round(mousePos.y);
+			markers[selectedMarker].check(canvas);
+		}
+		if (currentTool == 3) {
+			cropMarkers[selectedMarker].x = Math.round(mousePos.x);
+			cropMarkers[selectedMarker].y = Math.round(mousePos.y);
+			if (selectedMarker == 0) {
+				if (cropMarkers[0].x > cropMarkers[1].x - 11) cropMarkers[0].x = cropMarkers[1].x - 11;
+				if (cropMarkers[0].y > cropMarkers[1].y - 11) cropMarkers[0].y = cropMarkers[1].y - 11;
+			}
+			if (selectedMarker == 1) {
+				if (cropMarkers[1].x < cropMarkers[0].x + 11) cropMarkers[1].x = cropMarkers[0].x + 11;
+				if (cropMarkers[1].y < cropMarkers[0].y + 11) cropMarkers[1].y = cropMarkers[0].y + 11;
+			}
+		}
 	}
 	draw();
 }
 
 function getMarker(pos) {
 	let minDistance = 1000000
-
-	for (let i = 0; i < markers.length; i++) {
-		let dist = ((pos.x-markers[i].x)*(pos.x-markers[i].x)) + ((pos.y-markers[i].y)*(pos.y-markers[i].y))
-		if (dist < 250 && dist < minDistance) {
-			minDistance = dist;
-			selectedMarker = i;
+	if (currentTool == 1) {
+		for (let i = 0; i < markers.length; i++) {
+			let dist = ((pos.x-markers[i].x)*(pos.x-markers[i].x)) + ((pos.y-markers[i].y)*(pos.y-markers[i].y))
+			if (dist < 250 && dist < minDistance) {
+				minDistance = dist;
+				selectedMarker = i;
+			}
 		}
 	}
+	if (currentTool == 3) {
+		for (let i = 0; i < cropMarkers.length; i++) {
+			let dist = ((pos.x-cropMarkers[i].x)*(pos.x-cropMarkers[i].x)) + ((pos.y-cropMarkers[i].y)*(pos.y-cropMarkers[i].y))
+			if (dist < 250 && dist < minDistance) {
+				minDistance = dist;
+				selectedMarker = i;
+			}
+		}
+	}
+	
 }
 
 function addMarker() {
@@ -350,6 +446,54 @@ function markerSizeChange(selectedObject) {
 		m.size = parseInt(selectedObject.value);
 		m.check(canvas);
 	}
+	previewSmall();
+	draw();
+}
+
+function toolChange(selectedObject) {
+	currentTool = parseInt(selectedObject.value);
+	document.getElementById("bgSubtractSection").hidden = true;
+	document.getElementById("histogramSection").hidden = true;
+	document.getElementById("cropSection").hidden = true;
+	document.getElementById("testSection").hidden = true;
+	previewSmall();
+	draw();
+	if (currentTool == 1) {
+		document.getElementById("bgSubtractSection").hidden = false;
+		return;
+	}
+	if (currentTool == 2) {
+		document.getElementById("histogramSection").hidden = false;
+		return;
+	}
+	if (currentTool == 3) {
+		document.getElementById("cropSection").hidden = false;
+		return;
+	}
+	if (currentTool == 4) {
+		document.getElementById("testSection").hidden = false;
+		return;
+	}
+}
+
+function apply() {
+	if (currentTool == 1) {
+		process(imgSourceCanvas, imgSourceCtx, 1);
+		imgtag.src = imgSourceCanvas.toDataURL();
+	}
+	if (currentTool == 2) {
+		histogram.process(imgSourceCanvas, imgSourceCanvas);
+		imgtag.src = imgSourceCanvas.toDataURL();
+	}
+	if (currentTool == 3) {
+		imgSourceCanvas.width = cropMarkers[1].x-cropMarkers[0].x;
+		imgSourceCanvas.height = cropMarkers[1].y-cropMarkers[0].y;
+		imgSourceCtx.drawImage(imgtag, cropMarkers[0].x, cropMarkers[0].y, cropMarkers[1].x-cropMarkers[0].x, cropMarkers[1].y-cropMarkers[0].y, 0, 0, cropMarkers[1].x-cropMarkers[0].x, cropMarkers[1].y-cropMarkers[0].y)
+		imgtag.src = imgSourceCanvas.toDataURL();
+	}
+
+	
+
 	previewSmall();
 	draw();
 }
