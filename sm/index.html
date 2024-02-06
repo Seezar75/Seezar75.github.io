@@ -31,21 +31,21 @@
 				<ul id="mainMenu">
 					<li>
 						Field Type: <select id="gridType" onchange="setField()">
-							<option value="0">Square (4.4.4.4)</option>
-							<option value="1">Hex (6.6.6)</option>
-							<option value="2">Wall</option>
-							<option value="3">Floor 1 (4.8.8)</option>
-							<option value="4">Fishbone</option>
-							<option value="5">Triangle (3.3.3.3.3.3)</option>
-							<option value="6">Arrow</option>
-							<option value="7">Cubes</option>
-							<option value="8">Tri-quad (3.3.4.3.4)</option>
-							<option value="9">Cairo</option>
-							<option value="10">Bi-square</option>
-							<option value="11">(3.3.3.4.4)</option>
-							<option value="12">Tri-hex (3.6.3.6)</option>
-							<option value="13" >(3.4.6.4)</option>
-							<option value="14" hidden>Test Shape</option>
+							<option value="setSquare">Square (4.4.4.4)</option>
+							<option value="setHex">Hex (6.6.6)</option>
+							<option value="setWall">Wall</option>
+							<option value="setFloor1">Floor 1 (4.8.8)</option>
+							<option value="setFishbone">Fishbone</option>
+							<option value="setTri">Triangle (3.3.3.3.3.3)</option>
+							<option value="setArrow">Arrow</option>
+							<option value="setCubes">Cubes</option>
+							<option value="setTriQuad">Tri-quad (3.3.4.3.4)</option>
+							<option value="setCairo">Cairo</option>
+							<option value="setBiSquare">Bi-square</option>
+							<option value="set33344">(3.3.3.4.4)</option>
+							<option value="setTriHex">Tri-hex (3.6.3.6)</option>
+							<option value="set3464" >(3.4.6.4)</option>
+							<option value="JSONShape" hidden>Test Shape</option>
 						</select>
 					</li>
 					<li>Field Shape: <select id="gridShape" onchange="setField()">
@@ -70,14 +70,16 @@
 	<canvas id="myCanvas" width="800" height="800"></canvas>
 	<div id="infoBar" class="vertical-menu">
 		<!--<a href="#" class="active">Test</a>-->
-		<a href="#"><svg width="30" height="30">
+		<a href="#">
+      <svg width="30" height="30">
 				<circle cx="15" cy="15" r="14" fill="red" />
 			</svg>
 			</br>
 			<label id="minesLeft2">100</label>
 		</a>
 
-		<a href="#"><svg width="42" height="42">
+		<a href="#">
+      <svg width="42" height="42">
 				<ellipse style="stroke-width:3;fill:#444444;stroke:none" cx="21" cy="21" rx="19" ry="19" />
 				<path style="stroke-width:5;fill:none;stroke:#EEEEEE;stroke-linecap:round;stroke-linejoin:bevel"
 					d="m 21,8.5 0,12 h 7 v 0" />
@@ -86,12 +88,14 @@
 			<label id="minesLeft">00:00</label>
 		</a>
 
-		<a href="#"><svg width="50" height="50" onclick="showSettings()">
+		<a href="#">
+      <svg width="50" height="50" onclick="showSettings()">
 				<path style="fill:#444444"
 					d="m24.04 0.14285c-1.376 0-2.7263 0.12375-4.0386 0.34741l-0.64 6.7853c-1.3572 0.37831-2.6417 0.90728-3.8432 1.585l-5.244-4.3317c-2.2152 1.5679-4.1541 3.4955-5.7217 5.7101l4.3426 5.2437c-0.67695 1.2001-1.2177 2.4878-1.5959 3.8432l-6.7745 0.64053c-0.22379 1.3127-0.34741 2.6622-0.34741 4.0386 0 1.3788 0.12285 2.7238 0.34741 4.0386l6.7745 0.64056c0.37825 1.3554 0.91896 2.6431 1.5959 3.8432l-4.3317 5.2437c1.5648 2.2089 3.4908 4.1457 5.6997 5.7105l5.2545-4.3426c1.2023 0.67835 2.485 1.2174 3.8432 1.5959l0.64053 6.7853c1.3123 0.22368 2.6626 0.33658 4.0386 0.33658s2.7155-0.11289 4.0278-0.33658l0.64053-6.7853c1.3582-0.37847 2.6409-0.91755 3.8432-1.5959l5.2545 4.3426c2.2088-1.5649 4.1348-3.5017 5.6997-5.7105l-4.3317-5.2437c0.67695-1.2001 1.2177-2.4878 1.5959-3.8432l6.7744-0.64056c0.22456-1.3148 0.34741-2.6598 0.34741-4.0386 0-1.3765-0.12361-2.726-0.34741-4.0386l-6.7744-0.64053c-0.37825-1.3554-0.91896-2.6431-1.5959-3.8432l4.3426-5.2437c-1.568-2.2146-3.507-4.1422-5.722-5.7101l-5.2437 4.3317c-1.2015-0.67776-2.486-1.2067-3.8432-1.585l-0.641-6.7853c-1.3123-0.22366-2.6518-0.34741-4.0278-0.34741zm0 14.776c5.0178 0 9.076 4.0691 9.076 9.0869s-4.0582 9.0869-9.076 9.0869-9.0869-4.0691-9.0869-9.0869 4.0691-9.0869 9.0869-9.0869z" />
 			</svg>
 		</a>
-		<a href="#"><svg width="55" class="rotate-on-click" height="60" style="padding: 0px" onclick="setField()">
+		<a href="#">
+      <svg width="55" class="rotate-on-click" height="60" style="padding: 0px" onclick="setField()">
 				<path style="fill:#444444" <path
 					d="m45 10c-4.799-4.0243-10.962-6.4688-17.656-6.4688-15.129 0-27.562 12.434-27.562 27.562 0 15.129 12.434 27.281 27.562 27.281 11.86 0 22.052-7.4546 25.906-17.969l-9.875-2.4062c-2.6427 6.2319-8.7668 10.531-16.031 10.531-9.7241 0-17.438-7.7134-17.438-17.438 0-9.7241 7.7134-17.719 17.438-17.719 3.6079 0 6.923 1.1171 9.6875 3l-9.0312 7.1875 26.125 4.8438v-25.656z" />
 			</svg>
@@ -109,7 +113,10 @@
 		-->
 	</div>
 
-	<script src="js/index.js"></script>
+	<script src="./js/cells.js"></script>
+	<script src="./js/templates.js"></script>
+	<script src="./js/interface.js"></script>
+	<script src="./js/index.js"></script>
 </body>
 
 </html>
