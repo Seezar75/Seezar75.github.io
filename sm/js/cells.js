@@ -96,6 +96,11 @@ class Cell {
 	}
 
 	click() {
+    if (exploded) return;
+    if(timerId == null) {
+      startTime = Date.now();
+      timerId = setInterval(refreshTimer, 100);
+    }
 		if (!this.flagged) {
 			if (this.nearMines == 0 && this.visible == false) {
 				this.visible = true;
@@ -108,9 +113,8 @@ class Cell {
 			if (this.hasMine) {
 				exploded = true;
 				bgColor = "#FF0000";
-				//let msgBox = document.getElementById("msgBox");
-				//msgBox.style.display = "block";
-				//msgBox.style.visibility = "visible";
+        clearTimeout(timerId);
+        timerId = null;
 				showPopup();
 			}
 			this.visible = true;
@@ -126,6 +130,7 @@ class Cell {
 		return ((p.x - this.x) * (p.x - this.x) + (p.y - this.y) * (p.y - this.y) <= 1);
 	}
 
+  // checks if the cell is inside the borders of the field
 	isInCanvas() {
 		//return this.x>size && this.y>size && this.x<canvas.width-size && this.y<canvas.height-size;
 		let t = insidePoli(poliBorder, {
@@ -135,17 +140,16 @@ class Cell {
 		return t;
 	}
 
+  // highlights neighboring cells
 	markNeigh() {
-		//let n = 0;
 		for (let r of this.relations) {
 			if (!(r.ref === null) && !r.ref.visible && !r.ref.flagged) {
 				r.ref.isClicked = true;
-				//n++;
 			}
 		}
-		//console.log(n + " neighbors");
 	}
 
+  // counts the nimes of the neighboirng cells
 	countNearMines() {
 		let n = 0;
 		for (let r of this.relations) {
@@ -160,6 +164,8 @@ class Cell {
 		this.nearMines = n;
 	}
 
+  // clicks on all the neighboring cells if the number of flagged neighboring cells
+  // is equal to the number of neighboring mines
 	clearNumber() {
 		if (this.visible) {
 			let n = 0;
@@ -168,7 +174,6 @@ class Cell {
 				if (!(r.ref === null) && r.ref.flagged) n++;
 				if (!(r.ref === null)) neigh++;
 			}
-			//console.log("Number = " + this.nearMines + " n = " + n + " neigh = " + neigh);
 			if (this.nearMines == n) {
 				for (let r of this.relations) {
 					if (!(r.ref === null) && !r.ref.visible) r.ref.click();
@@ -405,7 +410,6 @@ class Rect extends Cell {
 	}
 
 	draw() {
-		//let si = size * this.props.scale / 2;
 		if (this.isClicked) {
 			ctx.strokeStyle = highlightCol;
 			ctx.fillStyle = highlightCol;
@@ -449,7 +453,7 @@ class Rect extends Cell {
 	}
 }
 
-// find a dell within all the cells
+// find a cell within all the cells
 function findCell(x, y) {
 	let c = null;
 	for (let ce of cells) {

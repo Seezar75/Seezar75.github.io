@@ -1,7 +1,6 @@
 // TODO: 
 // grid creation from text (JSON)
 // review checkbounds
-// Time!
 // do not regenerate field structure if settings are not changed
 // try to force integer coordinates to speed up rendering
 // pre-render background?
@@ -52,15 +51,16 @@ let offsY = 0;
 
 let dMax = 0;
 
+let timerId = null;
+let startTime = 0;
+
 
 window.onload = function () {
 	canvas = document.getElementById("myCanvas");
 	ctx = canvas.getContext("2d");
 
-	//ctx.textBaseline = "middle";
 	canvas.width = window.innerWidth;
 	canvas.height = window.innerHeight;
-	//console.log("Pixel ratio = " + window.devicePixelRatio);
 
 	//let ratio = window.screen.width/canvas.width;
 	//let vp = document.getElementById("Viewport");
@@ -162,27 +162,14 @@ function jsonCopy(src) {
 }
 
 function redraw() {
-	//console.log(globalTranslateX);
 	ctx.scale(globalScale, globalScale);
 	ctx.translate(globalTranslateX, globalTranslateY);
 	ctx.fillStyle = bgColor;
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
-	//let i = 0;
 	for (let c of cells) {
 		c.draw();
-		//ctx.fillStyle = "white";
-		//ctx.fillText(i, c.x, c.y);
-		//i++;
 	}
 	ctx.resetTransform();
-	//ctx.fillStyle = "#00FF00";
-	//ctx.beginPath();
-	//ctx.arc(400, 400, 3, 0, 2 * Math.PI);
-	//ctx.fill();
-	//ctx.fillStyle = "#FF0000";
-	//ctx.beginPath();
-	//ctx.arc(posCenterPinch.x, posCenterPinch.y, 20, 0, 2 * Math.PI);
-	//ctx.fill();
 }
 
 
@@ -191,6 +178,12 @@ function setField() {
 	//msgBox.style.display = "none";
 	msgBox.style.visibility = "hidden";
 
+  document.getElementById("elapsedTime").innerHTML = "00:00";
+  // Stop timer if player resets the field without winning or losing
+  if (timerId != null) {
+    clearTimeout(timerId);
+    timerId = null;
+  }
 	globalScale = 1;
 	globalTranslateX = 0;
 	globalTranslateY = 0;
@@ -316,6 +309,8 @@ function calc() {
 	if (hidden == numMines && !exploded) {
 		console.log("Victory!!!!!!!");
 		bgColor = "#00FF00";
+    clearTimeout(timerId);
+    timerId = null;
 	}
 }
 
@@ -354,8 +349,22 @@ function runFunction(name, arguments = null)
 {
   var fn = window[name];
   if(typeof fn !== 'function') {
-    console.log("unknlwn function");
+    console.log("unknown function");
     return;
   }
   fn.apply(window, arguments);
 }
+
+function refreshTimer() {
+  if (timerId != null) {
+    elapsedTime = Date.now() - startTime;
+    elapsedTime /= 1000;
+    let seconds = Math.floor(elapsedTime);
+    let minutes = Math.floor(seconds/60);
+    seconds = seconds % 60;
+    if (seconds < 10) seconds = "0" + seconds;
+    if (minutes < 10) minutes = "0" + minutes;
+    document.getElementById("elapsedTime").innerHTML = minutes + ":" + seconds;
+  }
+}
+
