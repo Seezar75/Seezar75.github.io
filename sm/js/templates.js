@@ -685,6 +685,88 @@ function setEscher() {
 	templateTarnsform(0.75337, 0);
 }
 
+function setFlanders() {
+  console.log("setFlanders");
+	templateRels.push([]);
+	templateRels.push([]);
+	templateRels.push([]);
+
+	let pts = [];
+  pts.push({x:1,y:0.5});
+  pts.push({x:-1,y:0.5});
+  pts.push({x:-1,y:-0.5});
+  pts.push({x:1,y:-0.5});
+
+	let props0 = {scale:Math.sqrt(2),sides:4,rot:Math.PI/4};
+	let props1 = {scale:1,rot:Math.PI/2,points:pts};
+  let props2 = {scale:1,rot:0,points:pts};
+
+	templateRels[0].push({dx:1,dy:0.5,t:1,shape:5,props:props1,ref:null});
+	templateRels[0].push({dx:0.5,dy:-1,t:2,shape:5,props:props2,ref:null});
+	templateRels[0].push({dx:-1,dy:-0.5,t:1,shape:5,props:props1,ref:null});
+	templateRels[0].push({dx:-0.5,dy:1,t:2,shape:5,props:props2,ref:null});
+
+	templateRels[1].push({dx:1,dy:0.5,t:0,shape:3,props:props0,ref:null});
+	templateRels[1].push({dx:1.5,dy:-0.5,t:2,shape:5,props:props2,ref:null});
+	templateRels[1].push({dx:1,dy:-2,t:1,shape:5,props:props1,ref:null});
+	templateRels[1].push({dx:-0.5,dy:-1.5,t:2,shape:5,props:props2,ref:null});
+	templateRels[1].push({dx:-1,dy:-0.5,t:0,shape:3,props:props0,ref:null});
+	templateRels[1].push({dx:-1.5,dy:0.5,t:2,shape:5,props:props2,ref:null});
+	templateRels[1].push({dx:-1,dy:2,t:1,shape:5,props:props1,ref:null});
+	templateRels[1].push({dx:0.5,dy:1.5,t:2,shape:5,props:props2,ref:null});
+
+	templateRels[2].push({dx:0.5,dy:1.5,t:1,shape:5,props:props1,ref:null});
+	templateRels[2].push({dx:2,dy:1,t:2,shape:5,props:props2,ref:null});
+	templateRels[2].push({dx:1.5,dy:-0.5,t:1,shape:5,props:props1,ref:null});
+	templateRels[2].push({dx:0.5,dy:-1,t:0,shape:3,props:props0,ref:null});
+	templateRels[2].push({dx:-0.5,dy:-1.5,t:1,shape:5,props:props1,ref:null});
+	templateRels[2].push({dx:-2,dy:-1,t:2,shape:5,props:props2,ref:null});
+	templateRels[2].push({dx:-1.5,dy:0.5,t:1,shape:5,props:props1,ref:null});
+	templateRels[2].push({dx:-0.5,dy:1,t:0,shape:3,props:props0,ref:null});
+
+	templateTarnsform(0.75337, Math.PI/4);
+}
+
+function setCementRoad() {
+	templateRels.push([]);
+	templateRels.push([]);
+
+	let pts = [];
+  pts.push({x:3,y:-3});
+  pts.push({x:5,y:-5});
+  pts.push({x:7,y:-3});
+  pts.push({x:7,y:3});
+  pts.push({x:5,y:5});
+  pts.push({x:3,y:3});
+  pts.push({x:-3,y:3});
+  pts.push({x:-5,y:5});
+  pts.push({x:-7,y:3});
+  pts.push({x:-7,y:-3});
+  pts.push({x:-5,y:-5});
+  pts.push({x:-3,y:-3});
+
+  let props0 = {scale:1/10,rot:0,points:pts};
+  let props1 = {scale:1/10,rot:Math.PI/2,points:pts};
+
+	templateRels[0].push({dx:1,dy:0,t:1,shape:5,props:props1,ref:null});
+	templateRels[0].push({dx:1,dy:1,t:0,shape:5,props:props0,ref:null});
+	templateRels[0].push({dx:0,dy:1,t:1,shape:5,props:props1,ref:null});
+	templateRels[0].push({dx:-1,dy:1,t:0,shape:5,props:props0,ref:null});
+	templateRels[0].push({dx:-1,dy:0,t:1,shape:5,props:props1,ref:null});
+	templateRels[0].push({dx:-1,dy:-1,t:0,shape:5,props:props0,ref:null});
+	templateRels[0].push({dx:0,dy:-1,t:1,shape:5,props:props1,ref:null});
+	templateRels[0].push({dx:1,dy:-1,t:0,shape:5,props:props0,ref:null});
+
+	templateRels[1].push({dx:1,dy:0,t:0,shape:5,props:props0,ref:null});
+	templateRels[1].push({dx:1,dy:1,t:1,shape:5,props:props1,ref:null});
+	templateRels[1].push({dx:0,dy:1,t:0,shape:5,props:props0,ref:null});
+	templateRels[1].push({dx:-1,dy:1,t:1,shape:5,props:props1,ref:null});
+	templateRels[1].push({dx:-1,dy:0,t:0,shape:5,props:props0,ref:null});
+	templateRels[1].push({dx:-1,dy:-1,t:1,shape:5,props:props1,ref:null});
+	templateRels[1].push({dx:0,dy:-1,t:0,shape:5,props:props0,ref:null});
+	templateRels[1].push({dx:1,dy:-1,t:1,shape:5,props:props1,ref:null});
+}
+
 // test for storing templates in JSON format
 function JSONShape() {
 	let str = `
