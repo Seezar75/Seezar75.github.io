@@ -1,10 +1,8 @@
 // TODO: 
-// grid creation from text (JSON)
 // review checkbounds
-// do not regenerate field structure if settings are not changed
 // try to force integer coordinates to speed up rendering
 // pre-render background?
-// quad-tree or spacial parsing
+// quad-tree or spatial parsing
 // display bombs and errors on explosion
 // restyle settings
 
@@ -174,22 +172,26 @@ function redraw() {
 
 
 function setField() {
+  // close the message box if open
 	let msgBox = document.getElementById("msgBox");
-	//msgBox.style.display = "none";
 	msgBox.style.visibility = "hidden";
 
+  // reset timer
   document.getElementById("elapsedTime").innerHTML = "00:00";
   // Stop timer if player resets the field without winning or losing
   if (timerId != null) {
     clearTimeout(timerId);
     timerId = null;
   }
+
+  // reset zoom and position
 	globalScale = 1;
 	globalTranslateX = 0;
 	globalTranslateY = 0;
 	exploded = false;
 	bgColor = "#FFFFFF";
-	let functionName = document.getElementById("gridType").value;
+
+  // prepare parameters for field generation
 	size = parseInt(document.getElementById("scaleSlider").value);
 	size = gridWidth / size;
 	fontSize = Math.floor(size / 2);
@@ -200,14 +202,30 @@ function setField() {
 	templateRels = null;
 	cells = [];
 	templateRels = [];
-  // call function to set the correct template
+  
+  // call function to set the correct template for the field type
+  let functionName = document.getElementById("gridType").value;
   runFunction(functionName);
-  // set the overall field shape
+
+  // set the overall field shape (external boudary)
 	setFieldShape();
 
+  // generate all the cells of the filed based on the template
   console.time('Generation');
+  generateEmptyFiled();
+  console.timeEnd('Generation');
+
+  // populate the filed with mines
+  populateField();
+
+	redraw();
+	calc();
+	//console.log("Max distance = " + dMax);
+}
+
+function generateEmptyFiled() {
   // create the first cell
-	cells.push(createCell(templateRels[0][0].t, canvas.width / 2 + (offsX * size), canvas.height / 2 + (offsY * size), templateRels[0][0].shape, templateRels[0][0].props));
+  cells.push(createCell(templateRels[0][0].t, canvas.width / 2 + (offsX * size), canvas.height / 2 + (offsY * size), templateRels[0][0].shape, templateRels[0][0].props));
   //cells[0].createNeighbors();
   //generate subsequent shells around the first cell and link to the previous shell
   let previousShellStartIndex = 0;
@@ -221,23 +239,50 @@ function setField() {
     previousPreviousShellStartIndex = previousShellStartIndex;
     previousShellStartIndex = currentShellStartIndex;
   }
-  console.timeEnd('Generation');
+}
 
-	numMines = Math.floor((cells.length + 1) * density);
-	for (let i = 0; i < numMines; i++) {
-		let c = chooseRandomElement(cells);
-		if (c.hasMine) {
-			i--;
-		} else {
-			c.hasMine = true;
-		}
-	}
-	for (let ce of cells) {
-		ce.countNearMines();
-	}
+function refreshField() {
+  document.getElementById("elapsedTime").innerHTML = "00:00";
+  // Stop timer if player resets the field without winning or losing
+  if (timerId != null) {
+    clearTimeout(timerId);
+    timerId = null;
+  }
+	globalScale = 1;
+	globalTranslateX = 0;
+	globalTranslateY = 0;
+	exploded = false;
+	bgColor = "#FFFFFF";
+  clearFiled();
+  populateField();
+
 	redraw();
 	calc();
-	//console.log("Max distance = " + dMax);
+}
+
+function clearFiled() {
+  for (let c of cells) {
+		c.isClicked = false;
+		c.hasMine = false;
+		c.nearMines = 0;
+		c.flagged = false;
+		c.visible = false;
+  }
+}
+
+function populateField() {
+  numMines = Math.floor((cells.length + 1) * density);
+  for (let i = 0; i < numMines; i++) {
+    let c = chooseRandomElement(cells);
+    if (c.hasMine) {
+      i--;
+    } else {
+      c.hasMine = true;
+    }
+  }
+  for (let ce of cells) {
+    ce.countNearMines();
+  }
 }
 
 // set the polygon of the outer border of the field
@@ -284,7 +329,7 @@ function changeSize() {
 function setDensity() {
 	let d = parseInt(document.getElementById("densitySlider").value);
 	density = d / 100;
-	setField();
+	refreshField();
 }
 
 // show all cells content

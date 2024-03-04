@@ -4,6 +4,7 @@
 <head>
 	<meta charset="UTF-8">
 	<title>SuperMines</title>
+  <link rel="icon" href="./favicon.png" type="image/png" />
 	<link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -16,7 +17,7 @@
 			<h2>You've lost!!!</h2>
 			<a class="close" onclick="showPopup()">&times;</a>
 			<div class="content">
-				<button type="button" onclick="showPopup();setField()">Reset</button>
+				<button type="button" onclick="showPopup();refreshField()">Reset</button>
 			</div>
 		</div>
 	</div>
@@ -63,7 +64,7 @@
 							onchange="setDensity()" oninput="document.getElementById('densityValue').innerHTML=this.value+'%'"><span
 							id="densityValue" class="range-value">14%</span></li>
 					<li>
-						<button type="button" onclick="setField()">Reset</button>
+						<button type="button" onclick="setField()">Generate</button>
 						<button type="button" onclick="showAll()">Show</button>
 					</li>
 				</ul>
@@ -98,7 +99,7 @@
 			</svg>
 		</a>
 		<a href="#">
-      <svg width="55" class="rotate-on-click" height="60" style="padding: 0px" onclick="setField()">
+      <svg width="55" class="rotate-on-click" height="60" style="padding: 0px" onclick="refreshField()">
 				<path style="fill:#444444" <path
 					d="m45 10c-4.799-4.0243-10.962-6.4688-17.656-6.4688-15.129 0-27.562 12.434-27.562 27.562 0 15.129 12.434 27.281 27.562 27.281 11.86 0 22.052-7.4546 25.906-17.969l-9.875-2.4062c-2.6427 6.2319-8.7668 10.531-16.031 10.531-9.7241 0-17.438-7.7134-17.438-17.438 0-9.7241 7.7134-17.719 17.438-17.719 3.6079 0 6.923 1.1171 9.6875 3l-9.0312 7.1875 26.125 4.8438v-25.656z" />
 			</svg>
@@ -116,6 +117,7 @@
 		-->
 	</div>
 
+  <script src="./js/utils.js"></script>
 	<script src="./js/cells.js"></script>
 	<script src="./js/templates.js"></script>
 	<script src="./js/interface.js"></script>
