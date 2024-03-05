@@ -32,24 +32,25 @@
 				<ul id="mainMenu">
 					<li>
 						Field Type: <select id="gridType" onchange="setField()">
-							<option value="setSquare">Square (4.4.4.4)</option>
-							<option value="setCementRoad">Cement Road</option>
-							<option value="setHex">Hex (6.6.6)</option>
-							<option value="setEscher">Escher lizards</option>
-							<option value="setWall">Wall</option>
-							<option value="setFloor1">Floor 1 (4.8.8)</option>
-							<option value="setFishbone">Fishbone</option>
-							<option value="setTri">Triangle (3.3.3.3.3.3)</option>
-							<option value="setArrow">Arrow</option>
-							<option value="setCubes">Cubes</option>
-							<option value="setTriQuad">Tri-quad (3.3.4.3.4)</option>
-							<option value="setCairo">Cairo</option>
-							<option value="setBiSquare">Bi-square</option>
-							<option value="setFlanders">Flanders weave</option>
-							<option value="set33344">(3.3.3.4.4)</option>
-							<option value="setTriHex">Tri-hex (3.6.3.6)</option>
-							<option value="set3464" >(3.4.6.4)</option>
-							<option value="JSONShape" hidden>Test Shape</option>
+							<option value="setSquare;generateStandardField">Square (4.4.4.4)</option>
+							<option value="setCementRoad;generateStandardField">Cement Road</option>
+							<option value="setHex;generateStandardField">Hex (6.6.6)</option>
+							<option value="setEscher;generateStandardField">Escher lizards</option>
+							<option value="setWall;generateStandardField">Wall</option>
+							<option value="setFloor1;generateStandardField">Floor 1 (4.8.8)</option>
+							<option value="setFishbone;generateStandardField">Fishbone</option>
+							<option value="setTri;generateStandardField">Triangle (3.3.3.3.3.3)</option>
+							<option value="setArrow;generateStandardField">Arrow</option>
+							<option value="setCubes;generateStandardField">Cubes</option>
+							<option value="setTriQuad;generateStandardField">Tri-quad (3.3.4.3.4)</option>
+							<option value="setCairo;generateStandardField">Cairo</option>
+							<option value="setBiSquare;generateStandardField">Bi-square</option>
+							<option value="setFlanders;generateStandardField">Flanders weave</option>
+							<option value="set33344;generateStandardField">(3.3.3.4.4)</option>
+							<option value="setTriHex;generateStandardField">Tri-hex (3.6.3.6)</option>
+							<option value="set3464;generateStandardField" >(3.4.6.4)</option>
+							<option value="doNothing;generatePenroseField" >Penrose P2</option>
+							<option value="JSONShape;generateStandardField" hidden>Test Shape</option>
 						</select>
 					</li>
 					<li>Field Shape: <select id="gridShape" onchange="setField()">
@@ -119,6 +120,7 @@
 
   <script src="./js/utils.js"></script>
 	<script src="./js/cells.js"></script>
+	<script src="./js/penrose.js"></script>
 	<script src="./js/templates.js"></script>
 	<script src="./js/interface.js"></script>
 	<script src="./js/index.js"></script>

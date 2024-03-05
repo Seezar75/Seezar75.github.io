@@ -42,3 +42,16 @@ class SpatialIndex {
 		return outArray;
 	}
 }
+
+function doNothing() {
+}
+
+function runFunction(name, arguments = null) {
+  console.log("Trying to run function " + name);
+  var fn = window[name];
+  if(typeof fn !== 'function') {
+    console.log("unknown function");
+    return;
+  }
+  fn.apply(window, arguments);
+}

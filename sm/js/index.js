@@ -52,10 +52,12 @@ let dMax = 0;
 let timerId = null;
 let startTime = 0;
 
+let spatialIndex;
 
 window.onload = function () {
 	canvas = document.getElementById("myCanvas");
 	ctx = canvas.getContext("2d");
+  ctx.lineJoin = "round";
 
 	canvas.width = window.innerWidth;
 	canvas.height = window.innerHeight;
@@ -203,16 +205,18 @@ function setField() {
 	cells = [];
 	templateRels = [];
   
+  // extract function names from the combo value
+  let functionNames = document.getElementById("gridType").value.split(';');
+
   // call function to set the correct template for the field type
-  let functionName = document.getElementById("gridType").value;
-  runFunction(functionName);
+  runFunction(functionNames[0]);
 
   // set the overall field shape (external boudary)
 	setFieldShape();
 
-  // generate all the cells of the filed based on the template
+  // generate all the cells of the filed 
   console.time('Generation');
-  generateEmptyFiled();
+  runFunction(functionNames[1]);
   console.timeEnd('Generation');
 
   // populate the filed with mines
@@ -223,7 +227,7 @@ function setField() {
 	//console.log("Max distance = " + dMax);
 }
 
-function generateEmptyFiled() {
+function generateStandardField() {
   // create the first cell
   cells.push(createCell(templateRels[0][0].t, canvas.width / 2 + (offsX * size), canvas.height / 2 + (offsY * size), templateRels[0][0].shape, templateRels[0][0].props));
   //cells[0].createNeighbors();
@@ -388,16 +392,6 @@ function checkFlag() {
 	}
 	redraw();
 	calc();
-}
-
-function runFunction(name, arguments = null)
-{
-  var fn = window[name];
-  if(typeof fn !== 'function') {
-    console.log("unknown function");
-    return;
-  }
-  fn.apply(window, arguments);
 }
 
 function refreshTimer() {
