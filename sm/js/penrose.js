@@ -26,12 +26,8 @@ class PenroseTile extends Cell {
 		}
 		
 		// limit angle between 0 and 2*PI
-		while (this.angle < 0) {
-			this.angle += 2*Math.PI;
-		}
-		while (this.angle > 2*Math.PI) {
-			this.angle -= 2*Math.PI;
-		}
+		if (this.angle < 0) this.angle += 2*Math.PI;
+		if (this.angle > 2*Math.PI) this.angle -= 2*Math.PI;
 		
 		let dist = [[G, G, G], [-G, -1, -G]];
 		let angle = this.angle - T;
@@ -124,15 +120,27 @@ function setupPrototiles(w, h, s) {
 		}
 	}
 	// remove duplicates
-	tls = next.filter((value, index, self) =>
-	  index === self.findIndex((t) => (
-		t.type === value.type && 
-		Math.abs(t.rx - value.rx) < 0.1 &&
-		Math.abs(t.ry - value.ry) < 0.1 &&
-		Math.abs(t.angle - value.angle) < 0.1
-	  ))
-	)
-	return deflatePenroseTiles(tls, generation - 1);
+	tls = removeDuplicates(next);
+
+  return deflatePenroseTiles(tls, generation - 1);
+}
+
+function removeDuplicates(arr) {
+	// use a dictionary with coordinates as key to store just one instance of a cell
+	let dict = new Object();
+	for (let c of arr) {
+    // construct the key with coordinates
+		let key = c.x.toFixed(2) + "-" + c.y.toFixed(2);
+    // add only if an instance with the same key is not present
+		if(dict[key]) continue;
+		dict[key] = c;
+	}
+  // convert the dictionary back into an array
+	let newArr = [];
+	for(let key in dict) {
+	  newArr.push(dict[key]);
+	}
+	return newArr;
 }
 
 function generatePenroseField() {
