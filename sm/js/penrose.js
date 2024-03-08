@@ -1,45 +1,62 @@
 // https://rosettacode.org/wiki/Penrose_tiling
 const G = (1 + Math.sqrt(5)) / 2; // golden ratio
 const T = Math.PI * 36 / 180; // theta
+const Lf = 2 * G * Math.cos(T);
+const Lt = 2 * G * Math.cos(2 * T);
 
 const PenroseType = {
+  P2: 0,
+  P3: 1
+};
+
+let penroseType = PenroseType.P3;
+
+const PenroseTileType = {
   Kite: 0,
-  Dart: 1
+  Dart: 1,
+  Thin: 2,
+  Fat: 3
 };
 
 class PenroseTile extends Cell {
-	constructor(_t, _rx, _ry, _a, _s) {
-		super(_rx, _ry, 0, null);
-		this.type = _t;
-		this.rx = _rx;
-		this.ry = _ry;
-		this.angle = _a;
-		this.size = _s;
-		this.relations = [];
-		
-		if (this.type == PenroseType.Kite) {
-			this.x = this.rx + this.size*G/1.7*Math.cos(this.angle);
-			this.y = this.ry - this.size*G/1.7*Math.sin(this.angle)
-		} else {
-			this.x = this.rx - this.size/1.5*Math.cos(this.angle);
-			this.y = this.ry + this.size/1.5*Math.sin(this.angle)
-		}
-		
-		// limit angle between 0 and 2*PI
-		if (this.angle < 0) this.angle += 2*Math.PI;
-		if (this.angle > 2*Math.PI) this.angle -= 2*Math.PI;
-		
-		let dist = [[G, G, G], [-G, -1, -G]];
-		let angle = this.angle - T;
-		this.poli = [];
-		this.poli.push({x: this.rx, y: this.ry});
-		for (let i = 0; i < 3; i++) {
-			let x = this.rx + dist[this.type][i] * this.size * Math.cos(angle);
-			let y = this.ry - dist[this.type][i] * this.size * Math.sin(angle);
-			this.poli.push({x: x, y: y});
-			angle += T;
-		}
-	}
+  constructor(_t, _rx, _ry, _a, _s) {
+    super(_rx, _ry, 0, null);
+    this.type = _t;
+    this.rx = _rx;
+    this.ry = _ry;
+    this.angle = _a;
+    this.size = _s;
+    this.relations = [];
+
+    if (this.type == PenroseTileType.Kite) {
+      this.x = this.rx + this.size*G/1.7*Math.cos(this.angle);
+      this.y = this.ry - this.size*G/1.7*Math.sin(this.angle)
+    } else if (this.type == PenroseTileType.Dart) {
+      this.x = this.rx - this.size/1.5*Math.cos(this.angle);
+      this.y = this.ry + this.size/1.5*Math.sin(this.angle)
+    } else if (this.type == PenroseTileType.Thin) {
+      this.x = this.rx - this.size*Lt/2*Math.cos(this.angle);
+      this.y = this.ry + this.size*Lt/2*Math.sin(this.angle)
+    } else if (this.type == PenroseTileType.Fat) {
+      this.x = this.rx + this.size*Lf/2*Math.cos(this.angle);
+      this.y = this.ry - this.size*Lf/2*Math.sin(this.angle)
+    }
+
+    // limit angle between 0 and 2*PI
+    if (this.angle < 0) this.angle += 2*Math.PI;
+    if (this.angle > 2*Math.PI) this.angle -= 2*Math.PI;
+
+    let dist = [[G, G, G], [-G, -1, -G], [-G, -Lt, -G], [G, Lf, G]];
+    let angleIncrements = [T, T, 2*T, T]
+    let angle = this.angle - angleIncrements[this.type];
+    this.poli = [];
+    this.poli.push({x: this.rx, y: this.ry});
+    for (let i = 0; i < 3; i++) {
+      let x = this.rx + dist[this.type][i] * this.size * Math.cos(angle);
+      let y = this.ry - dist[this.type][i] * this.size * Math.sin(angle);
+      this.poli.push({x: x, y: y});
+      angle += angleIncrements[this.type];
+  }}
 	
 	draw() {
 		if (this.isClicked) {
@@ -76,53 +93,86 @@ class PenroseTile extends Cell {
 	}
 }
 
-function setupPrototiles(w, h, s) {
+function setPenroseP2() {
+  penroseType = PenroseType.P2;
+}
+
+function setPenroseP3() {
+  penroseType = PenroseType.P3;
+}
+
+function setupInitialTiles(w, h, s) {
 	let proto = [];
 
-	// sun
-	for (let a = Math.PI / 2 + T; a < 3 * Math.PI; a += 2 * T)
-		proto.push(new PenroseTile(PenroseType.Kite, w / 2, h / 2, a, s));
-
+  if (penroseType == PenroseType.P2) {
+		for (let a = Math.PI / 2 + T; a < 5 / 2 * Math.PI; a += 2 * T)
+			proto.push(new PenroseTile(PenroseTileType.Kite, w / 2, h / 2, a, s));
+	} else {
+		for (let a = Math.PI / 2 + T; a < 5 / 2 * Math.PI; a += 2 * T) {
+			proto.push(new PenroseTile(PenroseTileType.Fat, w / 2, h / 2, a, s));
+		}
+	}
 	return proto;
 }
 
- function deflatePenroseTiles(tls, generation) {
-	if (generation <= 0)
-		return tls;
+ function subdividePenroseTiles(tls, generation) {
+  if (generation <= 0)
+  return tls;
 
-	next = [];
+  next = [];
 
-	for (let tile of tls) {
-		let x = tile.rx
-		let y = tile.ry
-		let a = tile.angle
-		let nx
-		let ny;
-		let newSize = tile.size / G;
-		size = newSize;
+  for (let tile of tls) {
+    let x = tile.rx
+    let y = tile.ry
+    let a = tile.angle
+    let nx
+    let ny;
+    let newSize = tile.size / G;
+    size = newSize;
 
-		if (tile.type == PenroseType.Dart) {
-			next.push(new PenroseTile(PenroseType.Kite, x, y, a + 5 * T, newSize));
-			for (let i = 0, sign = 1; i < 2; i++, sign *= -1) {
-				nx = x + Math.cos(a - 4 * T * sign) * G * tile.size;
-				ny = y - Math.sin(a - 4 * T * sign) * G * tile.size;
-				next.push(new PenroseTile(PenroseType.Dart, nx, ny, a - 4 * T * sign, newSize));
-			}
+    if (tile.type == PenroseTileType.Dart) {
+      next.push(new PenroseTile(PenroseTileType.Kite, x, y, a + 5 * T, newSize));
+      for (let i = 0, sign = 1; i < 2; i++, sign *= -1) {
+        nx = x + Math.cos(a - 4 * T * sign) * G * tile.size;
+        ny = y - Math.sin(a - 4 * T * sign) * G * tile.size;
+        next.push(new PenroseTile(PenroseTileType.Dart, nx, ny, a - 4 * T * sign, newSize));
+      }
 
-		} else {
-			for (let i = 0, sign = 1; i < 2; i++, sign *= -1) {
-				next.push(new PenroseTile(PenroseType.Dart, x, y, a - 4 * T * sign, newSize));
+    } else if (tile.type == PenroseTileType.Kite) {
+      for (let i = 0, sign = 1; i < 2; i++, sign *= -1) {
+        next.push(new PenroseTile(PenroseTileType.Dart, x, y, a - 4 * T * sign, newSize));
 
-				nx = x + Math.cos(a - T * sign) * G * tile.size;
-				ny = y - Math.sin(a - T * sign) * G * tile.size;
-				next.push(new PenroseTile(PenroseType.Kite, nx, ny, a + 3 * T * sign, newSize));
-			}
-		}
-	}
-	// remove duplicates
-	tls = removeDuplicates(next);
+        nx = x + Math.cos(a - T * sign) * G * tile.size;
+        ny = y - Math.sin(a - T * sign) * G * tile.size;
+        next.push(new PenroseTile(PenroseTileType.Kite, nx, ny, a + 3 * T * sign, newSize));
+      }
+    } else if (tile.type == PenroseTileType.Thin) {
+      nx = x - Math.cos(a) * Lt * tile.size;
+      ny = y + Math.sin(a) * Lt * tile.size;
+      next.push(new PenroseTile(PenroseTileType.Thin, nx, ny, a + 3 * T, newSize));
+      next.push(new PenroseTile(PenroseTileType.Thin, nx, ny, a - 3 * T, newSize));
 
-  return deflatePenroseTiles(tls, generation - 1);
+      for (let i = 0, sign = 1; i < 2; i++, sign *= -1) {
+        nx = x + Math.cos(a - 3 * T * sign) * G * tile.size;
+        ny = y - Math.sin(a - 3 * T * sign) * G * tile.size;
+        next.push(new PenroseTile(PenroseTileType.Fat, nx, ny, a + 2 * T * sign, newSize));
+      }
+    } else if (tile.type == PenroseTileType.Fat) {
+      nx = x + Math.cos(a) * Lf * tile.size;
+      ny = y - Math.sin(a) * Lf * tile.size;
+      next.push(new PenroseTile(PenroseTileType.Fat, nx, ny, a + Math.PI, newSize));
+
+      for (let i = 0, sign = 1; i < 2; i++, sign *= -1) {
+        nx = x + Math.cos(a - T * sign) * G * tile.size;
+        ny = y - Math.sin(a - T * sign) * G * tile.size;
+        next.push(new PenroseTile(PenroseTileType.Fat, nx, ny, a + 4 * T * sign, newSize));
+        next.push(new PenroseTile(PenroseTileType.Thin, nx, ny, a - 4 * T * sign, newSize));
+      }
+  }	}
+  // remove duplicates
+  tls = removeDuplicates(next);
+
+  return subdividePenroseTiles(tls, generation - 1);
 }
 
 function removeDuplicates(arr) {
@@ -152,9 +202,9 @@ function generatePenroseField() {
 	let startSize = 17.8461538 * factor +375
 	let gen = Math.ceil(0.0769230 * slider + 3.4615384);
   // generate all the Penrose tiles
-	console.time('Generation');
-	cells = deflatePenroseTiles(setupPrototiles(canvas.width, canvas.height, startSize), gen);
-	console.timeEnd('Generation');
+	console.time('Cell generation');
+	cells = subdividePenroseTiles(setupInitialTiles(canvas.width, canvas.height, startSize), gen);
+	console.timeEnd('Cell generation');
   // set the overall filed shape
 	setFieldShape();
   // delete all cells outside the field shape
@@ -191,7 +241,8 @@ function setSpatialIndex() {
 	minY -= size*G;
 	maxY += size*G;
 	
-	spatialIndex = new SpatialIndex(minX, maxX, minY, maxY, size*G*1.5);
+  // the spatial index size is set to one more of the maximum distance between cell centers
+	spatialIndex = new SpatialIndex(minX, maxX, minY, maxY, 1 + 2*G*Math.cos(T/2)*size);
 	for (let c of cells) {
 		spatialIndex.addElement(c);
 	}
