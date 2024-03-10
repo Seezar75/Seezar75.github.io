@@ -162,6 +162,7 @@ function jsonCopy(src) {
 }
 
 function redraw() {
+  ctx.lineJoin = "round";
 	ctx.scale(globalScale, globalScale);
 	ctx.translate(globalTranslateX, globalTranslateY);
 	ctx.fillStyle = bgColor;
