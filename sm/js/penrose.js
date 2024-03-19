@@ -121,7 +121,7 @@ function setPenroseP3() {
 }
 
 // construct initial tiles
-function setupInitialTiles(width, height, size) {
+function setupInitialTilesPenrose(width, height, size) {
   let initialTiles = [];
 
   if (penroseType == PenroseType.P2) {
@@ -242,7 +242,7 @@ function generatePenroseField() {
   let gen = Math.ceil(0.0769230 * slider + 3.4615384);
   // generate all the Penrose tiles
   console.time('Cell generation');
-  cells = subdividePenroseTiles(setupInitialTiles(canvas.width, canvas.height, startSize), gen);
+  cells = subdividePenroseTiles(setupInitialTilesPenrose(canvas.width, canvas.height, startSize), gen);
   console.timeEnd('Cell generation');
   // set the overall filed shape
   setFieldShape();
