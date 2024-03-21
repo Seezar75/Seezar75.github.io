@@ -509,6 +509,90 @@ function setHex() {
 	templateTarnsform(1.07, 0);
 }
 
+function setBloom() {
+	templateRels.push([]);
+	templateRels.push([]);
+	templateRels.push([]);
+	templateRels.push([]);
+	templateRels.push([]);
+	templateRels.push([]);
+
+  let hsq3 = Math.sqrt(3)/2;
+
+	offsX = 1.5;
+	offsY = -hsq3;
+
+	let pts = [];
+	pts.push({x:-1,y:0});
+	pts.push({x:-0.5,y:-hsq3});
+	pts.push({x:0.5,y:-hsq3});
+	pts.push({x:1,y:0});
+	pts.push({x:0,y:2*hsq3});
+
+	let props0 = {scale:1,rot:0,points:pts};
+	let props1 = {scale:1,rot:Math.PI/3,points:pts};
+	let props2 = {scale:1,rot:Math.PI/1.5,points:pts};
+	let props3 = {scale:1,rot:Math.PI,points:pts};
+	let props4 = {scale:1,rot:-Math.PI/1.5,points:pts};
+	let props5 = {scale:1,rot:-Math.PI/3,points:pts};
+
+	templateRels[0].push({dx:1.5,dy:hsq3,t:1,shape:5,props:props1,ref:null});
+	templateRels[0].push({dx:1.5,dy:3*hsq3,t:2,shape:5,props:props2,ref:null});
+	templateRels[0].push({dx:0,dy:4*hsq3,t:3,shape:5,props:props3,ref:null});
+	templateRels[0].push({dx:-1.5,dy:3*hsq3,t:4,shape:5,props:props4,ref:null});
+	templateRels[0].push({dx:-1.5,dy:hsq3,t:5,shape:5,props:props5,ref:null});
+	templateRels[0].push({dx:-1.5,dy:-hsq3,t:2,shape:5,props:props2,ref:null});
+	templateRels[0].push({dx:0,dy:-2*hsq3,t:4,shape:5,props:props4,ref:null});
+	templateRels[0].push({dx:1.5,dy:-hsq3,t:3,shape:5,props:props3,ref:null});
+
+	templateRels[1].push({dx:0,dy:2*hsq3,t:2,shape:5,props:props2,ref:null});
+	templateRels[1].push({dx:-1.5,dy:3*hsq3,t:3,shape:5,props:props3,ref:null});
+	templateRels[1].push({dx:-3,dy:2*hsq3,t:4,shape:5,props:props4,ref:null});
+	templateRels[1].push({dx:-3,dy:0,t:5,shape:5,props:props5,ref:null});
+	templateRels[1].push({dx:-1.5,dy:-hsq3,t:0,shape:5,props:props0,ref:null});
+	templateRels[1].push({dx:0,dy:-2*hsq3,t:3,shape:5,props:props3,ref:null});
+	templateRels[1].push({dx:1.5,dy:-hsq3,t:5,shape:5,props:props5,ref:null});
+	templateRels[1].push({dx:1.5,dy:hsq3,t:4,shape:5,props:props4,ref:null});
+
+	templateRels[2].push({dx:-1.5,dy:hsq3,t:3,shape:5,props:props3,ref:null});
+	templateRels[2].push({dx:-3,dy:0,t:4,shape:5,props:props4,ref:null});
+	templateRels[2].push({dx:-3,dy:-2*hsq3,t:5,shape:5,props:props5,ref:null});
+	templateRels[2].push({dx:-1.5,dy:-3*hsq3,t:0,shape:5,props:props0,ref:null});
+	templateRels[2].push({dx:0,dy:-2*hsq3,t:1,shape:5,props:props1,ref:null});
+	templateRels[2].push({dx:1.5,dy:-hsq3,t:4,shape:5,props:props4,ref:null});
+	templateRels[2].push({dx:1.5,dy:hsq3,t:0,shape:5,props:props0,ref:null});
+	templateRels[2].push({dx:0,dy:2*hsq3,t:5,shape:5,props:props5,ref:null});
+
+	templateRels[3].push({dx:-1.5,dy:-hsq3,t:4,shape:5,props:props4,ref:null});
+	templateRels[3].push({dx:-1.5,dy:-3*hsq3,t:5,shape:5,props:props5,ref:null});
+	templateRels[3].push({dx:0,dy:-4*hsq3,t:0,shape:5,props:props0,ref:null});
+	templateRels[3].push({dx:1.5,dy:-3*hsq3,t:1,shape:5,props:props1,ref:null});
+	templateRels[3].push({dx:1.5,dy:-hsq3,t:2,shape:5,props:props2,ref:null});
+	templateRels[3].push({dx:1.5,dy:hsq3,t:5,shape:5,props:props5,ref:null});
+	templateRels[3].push({dx:0,dy:2*hsq3,t:1,shape:5,props:props1,ref:null});
+	templateRels[3].push({dx:-1.5,dy:hsq3,t:0,shape:5,props:props0,ref:null});
+
+	templateRels[4].push({dx:0,dy:-2*hsq3,t:5,shape:5,props:props5,ref:null});
+	templateRels[4].push({dx:1.5,dy:-3*hsq3,t:0,shape:5,props:props0,ref:null});
+	templateRels[4].push({dx:3,dy:-2*hsq3,t:1,shape:5,props:props1,ref:null});
+	templateRels[4].push({dx:3,dy:0,t:2,shape:5,props:props2,ref:null});
+	templateRels[4].push({dx:1.5,dy:hsq3,t:3,shape:5,props:props3,ref:null});
+	templateRels[4].push({dx:0,dy:2*hsq3,t:0,shape:5,props:props0,ref:null});
+	templateRels[4].push({dx:-1.5,dy:hsq3,t:2,shape:5,props:props2,ref:null});
+	templateRels[4].push({dx:-1.5,dy:-hsq3,t:1,shape:5,props:props1,ref:null});
+
+	templateRels[5].push({dx:1.5,dy:-hsq3,t:0,shape:5,props:props0,ref:null});
+	templateRels[5].push({dx:3,dy:0,t:1,shape:5,props:props1,ref:null});
+	templateRels[5].push({dx:3,dy:2*hsq3,t:2,shape:5,props:props2,ref:null});
+	templateRels[5].push({dx:1.5,dy:3*hsq3,t:3,shape:5,props:props3,ref:null});
+	templateRels[5].push({dx:0,dy:2*hsq3,t:4,shape:5,props:props4,ref:null});
+	templateRels[5].push({dx:-1.5,dy:hsq3,t:1,shape:5,props:props1,ref:null});
+	templateRels[5].push({dx:-1.5,dy:-hsq3,t:3,shape:5,props:props3,ref:null});
+	templateRels[5].push({dx:0,dy:-2*hsq3,t:2,shape:5,props:props2,ref:null});
+
+	templateTarnsform(0.55, 0);
+}
+
 function setWall() {
 	templateRels.push([]);
 	templateRels[0].push({dx:1,dy:0,t:0,shape:1,ref:null});
