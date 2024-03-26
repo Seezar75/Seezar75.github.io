@@ -35,9 +35,7 @@ class Cell {
 
 		this.relations = [];
 		for (let i = 0; i < templateRels[type].length; i++) {
-			this.relations.push({
-				ref: null
-			});
+			this.relations.push(null);
 		}
 		this.hasMine = false;
 		this.nearMines = 0;
@@ -105,8 +103,8 @@ class Cell {
 			if (this.nearMines == 0 && this.visible == false) {
 				this.visible = true;
 				for (let r of this.relations) {
-					if (r.ref === null) {} else {
-						r.ref.click();
+					if (r === null) {} else {
+						r.click();
 					}
 				}
 			}
@@ -143,8 +141,8 @@ class Cell {
   // highlights neighboring cells
 	markNeigh() {
 		for (let r of this.relations) {
-			if (!(r.ref === null) && !r.ref.visible && !r.ref.flagged) {
-				r.ref.isClicked = true;
+			if (!(r === null) && !r.visible && !r.flagged) {
+				r.isClicked = true;
 			}
 		}
 	}
@@ -153,10 +151,10 @@ class Cell {
 	countNearMines() {
 		let n = 0;
 		for (let r of this.relations) {
-			if (r.ref === null) {
+			if (r === null) {
 
 			} else {
-				if (r.ref.hasMine) {
+				if (r.hasMine) {
 					n++;
 				}
 			}
@@ -171,12 +169,12 @@ class Cell {
 			let n = 0;
 			let neigh = 0;
 			for (let r of this.relations) {
-				if (!(r.ref === null) && r.ref.flagged) n++;
-				if (!(r.ref === null)) neigh++;
+				if (!(r === null) && r.flagged) n++;
+				if (!(r === null)) neigh++;
 			}
 			if (this.nearMines == n) {
 				for (let r of this.relations) {
-					if (!(r.ref === null) && !r.ref.visible) r.ref.click();
+					if (!(r === null) && !r.visible) r.click();
 				}
 			}
 		}
@@ -194,13 +192,13 @@ class Cell {
         // if it is inside the border of the field
 				if (c.isInCanvas()) {
           // link the new cell to this cell, add it to the total cells list and recursively generate it's neighbors
-					this.relations[i].ref = c;
+					this.relations[i] = c;
 					cells.push(c);
 					c.createNeighbors();
 				}
       // if there is already a cell in the position then link it to this cell
 			} else {
-				this.relations[i].ref = fi;
+				this.relations[i] = fi;
 			}
 		}
 	}
@@ -216,12 +214,12 @@ class Cell {
         // if it is inside the border of the field
 				if (c.isInCanvas()) {
           // link the new cell to this cell, add it to the total cells list
-					this.relations[i].ref = c;
+					this.relations[i] = c;
 					cells.push(c);
 				}
       // if there is already a cell in the position then link it to this cell
 			} else {
-				this.relations[i].ref = fi;
+				this.relations[i] = fi;
 			}
 		}
   }
