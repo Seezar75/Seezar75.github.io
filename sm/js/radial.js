@@ -80,9 +80,11 @@ function getRandomColor() {
 	return color;
 }
 
-function setupRadial1() {
-	setupRadial(2,5,2,false);
-}
+function setupRadial1_2_2() { setupRadial(1,2,2,false); }
+function setupRadial1_3_2() { setupRadial(1,3,2,false); }
+function setupRadial1_4_2() { setupRadial(1,4,2,false); }
+function setupRadial2_5_2() { setupRadial(2,5,2,false); }
+function setupRadial2_5_3() { setupRadial(2,5,3,false); }
 
 function setupRadial(m, k, t, offset) {
 	templateRels.push([]);
@@ -96,7 +98,7 @@ function setupRadial(m, k, t, offset) {
 		m = m / g;
 		k = k / g;
 	}
-	let level = 5;
+	let level = 12;
 	let n = offset ? 2*((t*k)-m) : t*k;
 	console.log("n = " + n);
 	let uVecs = [];
@@ -132,14 +134,15 @@ function setupRadial(m, k, t, offset) {
 
 	console.log("Base cell area = " + poliArea(points));
 
-	let L = 40;
+	let L = 20;
 	if (offset) center.x -= L/2;
 	for (let p of points) {
 		p.x = p.x * L;
 		p.y = p.y * L;
 	}
+	let maxLen = maxLength(points);
+	console.log("Max length = " + maxLen);
 
-	console.log(points.length);
 	let o1 = points[io1];
 	let o2 = points[io2];
 
@@ -201,7 +204,11 @@ function setupRadial(m, k, t, offset) {
 			// console.log((i + 1) * k + j);
 		}
 	}
+	setFieldShape();
+	// cells = cells.filter(cell => gridWidth / 2 > distance({x: canvas.width / 2, y : canvas.height / 2}, cell));
+	setSpatialIndexRadial(maxLen);
 	for (let c of cells) {
+		addNeighborsFast(c);
 		c.draw();
 	}
 }
@@ -243,3 +250,22 @@ function rotatePoint(_p, _rotVec) {
 	return {x : (_p.x * _rotVec.x) - (_p.y * _rotVec.y), y : (_p.x * _rotVec.y) + (_p.y * _rotVec.x)};
 }
 
+function setSpatialIndexRadial(maxLength) {
+	let minX = cells[0].x;
+	let minY = cells[0].y;
+	let maxX = cells[0].x;
+	let maxY = cells[0].y;
+	for (let c of cells) {
+		if (c.x < minX) minX = c.x;
+		if (c.y < minY) minY = c.y;
+		if (c.x > maxX) maxX = c.x;
+		if (c.y > maxY) maxY = c.y;
+	}
+	let maxDistance = 9+maxLength*1.1;
+	console.log("minX = " + minX + ", minY = " + minY + ", maxX = " + maxX + ", maxY = " + maxY, ", maxDistance = " + maxDistance);
+	spatialIndex = new SpatialIndex(minX, maxX, minY, maxY, maxDistance);
+	for (let c of cells) {
+		spatialIndex.addElement(c);
+	}
+
+}

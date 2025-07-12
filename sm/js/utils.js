@@ -64,3 +64,14 @@ function poliArea(inPoli) {
 	}
 	return area / 2;
 }
+
+function maxLength(inPoli) {
+	let maxLengthSquared = 0;
+	for (let i = 0; i < inPoli.length; i++) {
+		for (let j = i; j < inPoli.length; j++) {
+			let temp = Math.pow(inPoli[i].x - inPoli[j].x, 2) + Math.pow(inPoli[i].y - inPoli[j].y, 2)
+			if (temp > maxLengthSquared) maxLengthSquared = temp;
+		}
+	}
+	return Math.sqrt(maxLengthSquared);
+}
