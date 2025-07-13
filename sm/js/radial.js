@@ -1,3 +1,4 @@
+// Derived from:
 // A Family of Non-Periodic Tilings, Describable Using Elementary Tools and Exhibiting a New Kind of Structural Regularity
 // Miki Imura
 // https://arxiv.org/abs/2506.07638v1
@@ -81,36 +82,55 @@ function getRandomColor() {
 }
 
 function setupRadial1_2_2() { setupRadial(1,2,2,false); }
+function setupRadial1_2_3() { setupRadial(1,2,3,false); }
+function setupRadial1_2_4() { setupRadial(1,2,4,false); }
+function setupRadial1_2_5() { setupRadial(1,2,5,false); }
 function setupRadial1_3_2() { setupRadial(1,3,2,false); }
 function setupRadial1_4_2() { setupRadial(1,4,2,false); }
 function setupRadial2_5_2() { setupRadial(2,5,2,false); }
 function setupRadial2_5_3() { setupRadial(2,5,3,false); }
+function setupRadial3_8_2() { setupRadial(3,8,2,false); }
 
 function setupRadial(m, k, t, offset) {
+	// initial setup
 	templateRels.push([]);
 	ctx.fillStyle = "white";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 	cells = [];
 	let center = {x : canvas.width / 2, y : canvas.height / 2};
+
+	// Log and adjust parameters
 	console.log("m = " + m + " k = " + k + " t = " + t);
 	let g = gcd(m, k);
 	if (g != 1) {
 		m = m / g;
 		k = k / g;
 	}
-	let level = 12;
+
+	// let level = 10;
+	let approxNumCells = Math.pow(parseInt(document.getElementById("scaleSlider").value),2);
 	let n = offset ? 2*((t*k)-m) : t*k;
+	// how many slices I have to generate for each sectpr
+	let sliceCount = offset ? n/2 : k;
+	// how many sectors I have to generate
+	let sectorCount = offset ? 2 : t;
+	let level = Math.floor((Math.sqrt(1+8*(approxNumCells/(sliceCount*sectorCount)))-1)/2);
 	console.log("n = " + n);
+
+	// Populate direction vectors array
 	let uVecs = [];
 	for (let i = 0; i < n; i++) {
 		uVecs.push({x : Math.cos(2 * Math.PI * i / n), y : Math.sin(2 * Math.PI * i / n)});
 	}
+
+	// Populate sequence array
 	let s = [];
 	for (let j = 0; j < k; j++) {
 		s.push((j*m)%k);
 	}
 	s.push(k);
 
+	// Define base shape with unitary length
 	let points = [];
 	points.push({x : 0, y : 0});
 
@@ -119,6 +139,7 @@ function setupRadial(m, k, t, offset) {
 		points.push({x : p.x + (uVecs[j].x), y : p.y + (uVecs[j].y)});
 	}
 
+	// store indeces of the points from where the subsequent cells will start
 	let io1 = points.length - 2;
 	let io2 = points.length;
 
@@ -132,9 +153,11 @@ function setupRadial(m, k, t, offset) {
 		points.push({x : p.x - (uVecs[j].x), y : p.y - (uVecs[j].y)});
 	}
 
-	console.log("Base cell area = " + poliArea(points));
+	let unitaryCellArea = poliArea(points);
+	console.log("Base cell area = " + unitaryCellArea);
 
-	let L = 20;
+	// let L = 20;
+	let L = gridWidth / (1.2 * level * maxLength(points));
 	if (offset) center.x -= L/2;
 	for (let p of points) {
 		p.x = p.x * L;
@@ -155,11 +178,8 @@ function setupRadial(m, k, t, offset) {
 	let index = 0;
 	let sliceStartingPoints = [{x : 0, y : 0}];
 
-	// console.log(s);
-	// how many slices I have to generate for each sectpr
-	let limit = offset ? n/2 : k;
 
-	for (let i = 1; i < limit; i++) {
+	for (let i = 1; i < sliceCount; i++) {
 
 		// console.log("Before");
 		// console.log(bounduaryS);
@@ -192,11 +212,10 @@ function setupRadial(m, k, t, offset) {
 	// console.log(sliceStartingPoints);
 	// console.log("n = " + n);
 	if (offset) center.x += L;
-	let sectorCount = offset ? 2 : t;
 	for (let i = 0; i < sectorCount - 1; i++) {
-		let sectorRotationVector = uVecs[(i + 1) * limit];
-		for (let j = 0; j < limit; j++) {
-			let sliceRotationVector = uVecs[(i + 1) * limit + j];
+		let sectorRotationVector = uVecs[(i + 1) * sliceCount];
+		for (let j = 0; j < sliceCount; j++) {
+			let sliceRotationVector = uVecs[(i + 1) * sliceCount + j];
 			let sliceStartingPoint = rotatePoint(sliceStartingPoints[j], sectorRotationVector);
 			// console.log(sliceRotationVector);
 			// console.log(sliceStartingPoint);
@@ -211,6 +230,12 @@ function setupRadial(m, k, t, offset) {
 		addNeighborsFast(c);
 		c.draw();
 	}
+
+	// total number of cells = number of cells per slice * number of slices * number of sectors
+	let numCells =  (level * (level + 1) / 2) * sliceCount * sectorCount;
+	console.log("Real number of cells = " + cells.length + ", calculated number of cells = " + numCells);
+	let calculatedLevel = (Math.sqrt(1+8*(cells.length/(sliceCount*sectorCount)))-1)/2;
+	console.log("Calculated level = " + calculatedLevel);
 }
 
 function generateSlice(cells, _rx, _ry, _rotVec, _points, _o1, _o2, level) {
@@ -230,7 +255,7 @@ function generateSlice(cells, _rx, _ry, _rotVec, _points, _o1, _o2, level) {
 	cells.push(c1);
 	currentGeneration.push(c1);
 
-	for (let gen = 0; gen < level; gen++) {
+	for (let gen = 0; gen < level - 1; gen++) {
 		let co1 = new RadialCell(currentGeneration[0].rx + o1.x, currentGeneration[0].ry + o1.y, rotatedPoints, currColor);
 		cells.push(co1);
 		nextGeneration.push(co1);
@@ -261,6 +286,10 @@ function setSpatialIndexRadial(maxLength) {
 		if (c.x > maxX) maxX = c.x;
 		if (c.y > maxY) maxY = c.y;
 	}
+	minX--;
+	minY--;
+	maxX++;
+	maxY++;
 	let maxDistance = 9+maxLength*1.1;
 	console.log("minX = " + minX + ", minY = " + minY + ", maxX = " + maxX + ", maxY = " + maxY, ", maxDistance = " + maxDistance);
 	spatialIndex = new SpatialIndex(minX, maxX, minY, maxY, maxDistance);
