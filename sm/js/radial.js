@@ -86,6 +86,7 @@ function setupRadial1_2_3() { setupRadial(1,2,3,false); }
 function setupRadial1_2_4() { setupRadial(1,2,4,false); }
 function setupRadial1_2_5() { setupRadial(1,2,5,false); }
 function setupRadial1_3_2() { setupRadial(1,3,2,false); }
+function setupRadial1_3_3() { setupRadial(1,3,3,false); }
 function setupRadial1_4_2() { setupRadial(1,4,2,false); }
 function setupRadial2_5_2() { setupRadial(2,5,2,false); }
 function setupRadial2_5_3() { setupRadial(2,5,3,false); }
@@ -156,8 +157,8 @@ function setupRadial(m, k, t, offset) {
 	let unitaryCellArea = poliArea(points);
 	console.log("Base cell area = " + unitaryCellArea);
 
-	// let L = 20;
-	let L = gridWidth / (1.2 * level * maxLength(points));
+	// Calculate the length of the base segment
+	let L = gridWidth / (1.5 * (level + 1) * maxLength(points));
 	if (offset) center.x -= L/2;
 	for (let p of points) {
 		p.x = p.x * L;
@@ -168,7 +169,6 @@ function setupRadial(m, k, t, offset) {
 
 	let o1 = points[io1];
 	let o2 = points[io2];
-
 
 	generateSlice(cells, center.x , center.y, uVecs[0], points, o1, o2, level);
 
