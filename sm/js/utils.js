@@ -49,8 +49,29 @@ function doNothing() {
 function runFunction(name, arguments = null) {
   var fn = window[name];
   if(typeof fn !== 'function') {
-    console.log("unknown function");
+    console.log("unknown function " + name);
     return;
   }
   fn.apply(window, arguments);
+}
+
+function poliArea(inPoli) {
+	let area = 0;
+	let j = inPoli.length - 1;
+	for (let i = 0; i < inPoli.length; i++) {
+		area += (inPoli[i].x + inPoli[j].x) * (inPoli[i].y - inPoli[j].y)
+		j = i;
+	}
+	return area / 2;
+}
+
+function maxLength(inPoli) {
+	let maxLengthSquared = 0;
+	for (let i = 0; i < inPoli.length; i++) {
+		for (let j = i; j < inPoli.length; j++) {
+			let temp = Math.pow(inPoli[i].x - inPoli[j].x, 2) + Math.pow(inPoli[i].y - inPoli[j].y, 2)
+			if (temp > maxLengthSquared) maxLengthSquared = temp;
+		}
+	}
+	return Math.sqrt(maxLengthSquared);
 }
